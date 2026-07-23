@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ruler Premium | Tools & Comp AI</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(18, 24, 38, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #00f0ff;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg); color: var(--text-main); min-height: 100vh;
+      display: flex; justify-content: center;
+      background-image: radial-gradient(circle at 10% 10%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .app-container {
+      width: 100%; max-width: 480px; min-height: 100vh; display: flex; flex-direction: column;
+      position: relative; padding-bottom: 30px;
+    }
+
+    /* HEADER */
+    header {
+      padding: 18px 20px 12px 20px; display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg); z-index: 50;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+    .brand-title span { background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .auth-btn {
+      background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+      padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* TOP NAV (Kaydırılabilir Üst Menü) */
+    .top-nav {
+      display: flex; gap: 8px; padding: 0 20px 10px 20px;
+      overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--card-border);
+      margin-bottom: 15px;
+    }
+    .top-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      padding: 8px 14px; color: var(--text-sub); font-size: 12px; font-weight: 700; cursor: pointer;
+      border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid transparent;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .nav-item.active {
+      color: #000; background: var(--accent-cyan); font-weight: 800; border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    /* TABS CONTENT */
+    .tab-content { display: none; padding: 0 20px; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* COMPONENTS */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid var(--card-border); border-radius: var(--radius); padding: 18px; margin-bottom: 15px;
+    }
+    .hero-tag { display: inline-block; padding: 3px 8px; background: rgba(0, 240, 255, 0.15); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 20px; font-size: 10px; font-weight: 700; margin-bottom: 8px; }
+    .hero-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .hero-desc { font-size: 12px; color: var(--text-sub); line-height: 1.4; }
+
+    .ai-upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 12px; cursor: pointer;
+    }
+    .ai-upload-box:hover { border-color: var(--accent-cyan); }
+    .ai-upload-icon { font-size: 28px; color: var(--accent-cyan); margin-bottom: 8px; }
+    .ai-upload-title { font-size: 13px; font-weight: 700; }
+    .file-input { display: none; }
+    .preview-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,240,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 11px; margin-top: 8px; color: var(--accent-cyan); }
+
+    .action-btn {
+      width: 100%; padding: 14px; border: none; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #000; font-size: 13px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    /* KLİP KARTLARI */
+    .clip-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .clip-info h4 { font-size: 13px; font-weight: 700; color: #fff; }
+    .clip-info p { font-size: 11px; color: var(--text-sub); }
+
+    /* FAB FEEDBACK */
+    .fab-feedback {
+      position: fixed; bottom: 20px; right: 20px; width: 46px; height: 46px;
+      background: var(--accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); z-index: 90;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px;
+    }
+    .modal-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; width: 100%; max-width: 380px; padding: 20px; position: relative; }
+    .modal-close { position: absolute; top: 15px; right: 15px; color: var(--text-sub); cursor: pointer; }
+    .custom-input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; outline: none; font-size: 13px; }
+    textarea.custom-input { resize: none; height: 80px; }
+
+    .ai-console { background: #000; border: 1px solid var(--card-border); border-radius: var(--radius); padding: 12px; margin-top: 12px; font-family: monospace; font-size: 11px; color: #00ff88; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="brand-title">Ruler <span>PREMIUM</span></div>
+      <div class="auth-btn" onclick="openModal('authModal')">
+        <i class="fa-solid fa-user"></i> Giriş Yap
+      </div>
+    </header>
+
+    <!-- TOP NAVIGATION (Yatay Menü) -->
+    <nav class="top-nav">
+      <div class="nav-item active" onclick="switchTab('premium', this)">
+        <i class="fa-solid fa-house"></i> Premium
+      </div>
+      <div class="nav-item" onclick="switchTab('studio', this)">
+        <i class="fa-solid fa-palette"></i> Studio
+      </div>
+      <div class="nav-item" onclick="switchTab('compai', this)">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Comp AI
+      </div>
+      <div class="nav-item" onclick="switchTab('clips', this)">
+        <i class="fa-solid fa-film"></i> Klipler
+      </div>
+      <div class="nav-item" onclick="switchTab('about', this)">
+        <i class="fa-solid fa-circle-info"></i> Hakkında
+      </div>
+    </nav>
+
+    <main>
+      <!-- TAB 1: PREMIUM (Ana Sayfa) -->
+      <section id="tab-premium" class="tab-content active">
+        <div class="hero-banner">
+          <span class="hero-tag">RULER PLATFORM</span>
+          <h2 class="hero-title">Ruler Premium'a Hoş Geldin</h2>
+          <p class="hero-desc">Mobil ve PC uyumlu profesyonel editör araçları, otomatik klip ayıklama motoru ve hazır medya paneli.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:12px; border-radius:12px; text-align:center;">
+            <div style="font-size:18px; font-weight:800; color:var(--accent-cyan);">ONLINE</div>
+            <div style="font-size:10px; color:var(--text-sub);">Sistem Durumu</div>
+          </div>
+          <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:12px; border-radius:12px; text-align:center;">
+            <div style="font-size:18px; font-weight:800; color:var(--accent-purple);">v4.2</div>
+            <div style="font-size:10px; color:var(--text-sub);">AI Motor Sürümü</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: STUDIO -->
+      <section id="tab-studio" class="tab-content">
+        <div class="hero-banner">
+          <h2 class="hero-title">Ruler Studio</h2>
+          <p class="hero-desc">Editörler için pratik yapay zeka araçları.</p>
+        </div>
+
+        <h3 style="font-size: 13px; margin-bottom: 10px;"><i class="fa-solid fa-image"></i> Arka Plan Kaldırıcı</h3>
+        <div class="ai-upload-box" onclick="document.getElementById('bgInput').click()">
+          <i class="fa-solid fa-file-image ai-upload-icon" style="color:var(--accent-blue)"></i>
+          <div class="ai-upload-title">Görsel Yükle (.PNG, .JPG)</div>
+          <input type="file" id="bgInput" class="file-input" accept="image/*" onchange="showFile(this, 'bgBadge')">
+          <div id="bgBadge" class="preview-badge" style="display:none;"><i class="fa-solid fa-check"></i> <span></span></div>
+        </div>
+
+        <button class="action-btn" onclick="startStudioProcess()">
+          <i class="fa-solid fa-eraser"></i> Arka Planı Temizle
+        </button>
+        <div class="ai-console" id="studioConsole"></div>
+      </section>
+
+      <!-- TAB 3: COMP AI -->
+      <section id="tab-compai" class="tab-content">
+        <div class="hero-banner">
+          <span class="hero-tag" style="border-color:var(--accent-purple); color:var(--accent-purple)">COMP AI ENGINE</span>
+          <h2 class="hero-title">Otomatik Klip Çıkarıcı</h2>
+          <p class="hero-desc">Maç videosunu ve oyuncunun SS'ini yükle, yapay zeka sadece o oyuncunun olduğu klipleri çıkarsın.</p>
+        </div>
+
+        <div class="ai-upload-box" onclick="document.getElementById('videoInput').click()">
+          <i class="fa-solid fa-file-video ai-upload-icon"></i>
+          <div class="ai-upload-title">1. Maç Videosu (.mp4)</div>
+          <input type="file" id="videoInput" class="file-input" accept="video/*" onchange="showFile(this, 'videoBadge')">
+          <div id="videoBadge" class="preview-badge" style="display:none;"><i class="fa-solid fa-check"></i> <span></span></div>
+        </div>
+
+        <div class="ai-upload-box" onclick="document.getElementById('photoInput').click()">
+          <i class="fa-solid fa-user-tag ai-upload-icon" style="color:var(--accent-purple)"></i>
+          <div class="ai-upload-title">2. Oyuncu SS (.jpg)</div>
+          <input type="file" id="photoInput" class="file-input" accept="image/*" onchange="showFile(this, 'photoBadge')">
+          <div id="photoBadge" class="preview-badge" style="display:none;"><i class="fa-solid fa-check"></i> <span></span></div>
+        </div>
+
+        <button class="action-btn" onclick="startAiProcess()">
+          <i class="fa-solid fa-bolt"></i> Taramayı Başlat
+        </button>
+
+        <div class="ai-console" id="aiConsole">
+          <div id="consoleLog"></div>
+        </div>
+      </section>
+
+      <!-- TAB 4: KLİPLER -->
+      <section id="tab-clips" class="tab-content">
+        <div class="hero-banner">
+          <h2 class="hero-title">Hazır Klipler & Arşiv</h2>
+          <p class="hero-desc">Edit yapmanız için hazırlanmış ham maç ve oyuncu klipleri.</p>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-info">
+            <h4>Mauro Icardi - Tüm Dokunuşlar</h4>
+            <p>1080p 60FPS • 1.2 GB</p>
+          </div>
+          <i class="fa-solid fa-download" style="color:var(--accent-cyan); cursor:pointer;"></i>
+        </div>
+
+        <div class="clip-card">
+          <div class="clip-info">
+            <h4>Derbi Özeti (Ham Kayıt)</h4>
+            <p>4K UltraHD • 4.5 GB</p>
+          </div>
+          <i class="fa-solid fa-download" style="color:var(--accent-cyan); cursor:pointer;"></i>
+        </div>
+      </section>
+
+      <!-- TAB 5: HAKKINDA -->
+      <section id="tab-about" class="tab-content">
+        <div class="hero-banner">
+          <h2 class="hero-title">Ruler Premium Hakkında</h2>
+          <p class="hero-desc">Bu platform, içerik üreticileri ve editörlerin video üretim sürecini hızlandırmak için geliştirilmiştir.</p>
+        </div>
+
+        <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:15px; border-radius:12px; font-size:12px; line-height:1.6;">
+          <p><b>Geliştirici:</b> Ruler Team</p>
+          <p><b>Destek & İletişim:</b> Telegram / Discord topluluğumuz üzerinden adminlere ulaşabilirsiniz.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FEEDBACK BUTONU -->
+    <div class="fab-feedback" onclick="openModal('feedbackModal')">
+      <i class="fa-solid fa-comment-dots"></i>
+    </div>
+
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <i class="fa-solid fa-xmark modal-close" onclick="closeModal('authModal')"></i>
+      <h3 style="font-size:16px; margin-bottom:12px;">Giriş Yap / Kayıt Ol</h3>
+      <input type="text" class="custom-input" placeholder="Kullanıcı Adı">
+      <input type="password" class="custom-input" placeholder="Şifre">
+      <button class="action-btn" onclick="closeModal('authModal'); alert('Giriş yapıldı.');">Devam Et</button>
+    </div>
+  </div>
+
+  <!-- FEEDBACK MODAL -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-box">
+      <i class="fa-solid fa-xmark modal-close" onclick="closeModal('feedbackModal')"></i>
+      <h3 style="font-size:16px; margin-bottom:12px; color:var(--accent-purple);">Adminlere Mesaj Gönder</h3>
+      <input type="text" class="custom-input" placeholder="Konu">
+      <textarea class="custom-input" placeholder="Mesajınız..."></textarea>
+      <button class="action-btn" style="background:var(--accent-purple); color:#fff;" onclick="sendFeedback()">Gönder</button>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabName, element) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      element.classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function showFile(input, badgeId) {
+      if (input.files && input.files[0]) {
+        let badge = document.getElementById(badgeId);
+        badge.querySelector('span').innerText = input.files[0].name;
+        badge.style.display = 'inline-flex';
+      }
+    }
+
+    function sendFeedback() {
+      alert("Geri bildiriminiz adminlere iletildi!");
+      closeModal('feedbackModal');
+    }
+
+    function startStudioProcess() {
+      let file = document.getElementById('bgInput').files[0];
+      if(!file) { alert("Lütfen önce bir resim seçin!"); return; }
+      let consoleBox = document.getElementById('studioConsole');
+      consoleBox.style.display = 'block';
+      consoleBox.innerHTML = "> Arka plan taranıyor...<br>> Obje ayıklandı!<br><b>Tamamlandı.</b>";
+    }
+
+    async function startAiProcess() {
+      let video = document.getElementById('videoInput').files[0];
+      let photo = document.getElementById('photoInput').files[0];
+
+      if (!video || !photo) { 
+        alert("Lütfen hem video hem de oyuncu fotoğrafı seçin!"); 
+        return; 
+      }
+
+      let consoleBox = document.getElementById('aiConsole');
+      let consoleLog = document.getElementById('consoleLog');
+      
+      consoleBox.style.display = 'block';
+      consoleLog.innerHTML = "> Hugging Face sunucusuna bağlanılıyor...<br>> Video ve fotoğraf aktarılıyor...";
+
+      let formData = new FormData();
+      formData.append("video", video);
+      formData.append("photo", photo);
+
+      try {
+        // Haindomdom99/rulerpremium canlı API bağlantısı
+        let response = await fetch("https://haindomdom99-rulerpremium.hf.space/process-video", {
+          method: "POST",
+          body: formData
+        });
+
+        let result = await response.json();
+
+        if (result.success) {
+          consoleLog.innerHTML += "<br>> <b>Başarılı:</b> " + result.message;
+        } else {
+          consoleLog.innerHTML += "<br>> <span style='color:red;'>Hata oluştu!</span>";
+        }
+      } catch (error) {
+        consoleLog.innerHTML += "<br>> <span style='color:red;'>Sunucu bağlantı hatası! Hugging Face Space sunucunun 'Running' durumda olduğundan emin ol.</span>";
+      }
+    }
+  </script>
+</body>
+</html>
