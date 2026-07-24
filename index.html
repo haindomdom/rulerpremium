@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruler PREMIUM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                        rulerblue: '#00e5ff',
+                        rulerred: '#ff3b3b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 80px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Scrollbar Gizleme */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        /* Mobil Alt Menü, Masaüstü Sol/Üst Menü Uyumluluğu */
+        @media (min-width: 768px) {
+            body { padding-bottom: 0; padding-left: 250px; }
+            #bottom-nav { left: 0; top: 0; width: 250px; height: 100vh; flex-direction: column; justify-content: flex-start; padding-top: 2rem; border-top: none; border-right: 1px solid #334155; }
+            #bottom-nav button { width: 100%; justify-content: flex-start; padding: 1rem 2rem; margin-bottom: 0.5rem; }
+            #bottom-nav button span { display: inline-block !important; margin-left: 1rem; font-size: 1.1rem; }
+            .content-area { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        }
+        /* Yüzen Geri Bildirim Butonu */
+        .fab { position: fixed; bottom: 90px; right: 20px; z-index: 50; transition: all 0.3s ease; }
+        @media (min-width: 768px) { .fab { bottom: 30px; right: 30px; } }
+        .fab:hover { transform: scale(1.1); }
+        
+        /* Kolaj Grid Önizleme */
+        #collage-preview-grid { display: grid; gap: 5px; width: 100%; max-width: 500px; margin: 0 auto; background: #000; padding: 5px; border-radius: 8px; }
+        .collage-item { width: 100%; height: 100%; object-fit: cover; background: #334155; border-radius: 4px; aspect-ratio: 1/1; }
+    </style>
+</head>
+<body class="bg-darkbg text-white">
+
+    <!-- Üst Bar -->
+    <header class="flex justify-between items-center p-4 border-b border-gray-800 bg-darkcard sticky top-0 z-40">
+        <div class="flex items-center gap-2">
+            <div class="bg-rulerblue text-black font-bold w-8 h-8 flex items-center justify-center rounded">R</div>
+            <h1 class="font-bold text-xl">Ruler <span class="text-rulerblue">PREMIUM</span></h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="user-role-badge" class="bg-gray-700 text-xs px-2 py-1 rounded font-semibold text-gray-300">
+                <i class="fa-solid fa-user"></i> FREE
+            </span>
+            <button onclick="toggleAdmin()" class="text-sm bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded transition">Giriş/Çıkış</button>
+        </div>
+    </header>
+
+    <!-- Ana İçerik Alanı -->
+    <main class="content-area p-4 mb-20 md:mb-0">
+        
+        <!-- ANA SAYFA -->
+        <section id="tab-home" class="tab-content active">
+            <h2 class="text-2xl font-bold mb-4">Hoş Geldin!</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-darkcard p-5 rounded-xl border border-gray-700">
+                    <h3 class="text-lg font-bold text-rulerblue mb-2"><i class="fa-solid fa-bolt"></i> Son Güncellemeler</h3>
+                    <ul class="list-disc pl-5 text-gray-400 space-y-2 text-sm">
+                        <li>Klipler ve Presetler bölümü güncellendi, önizleme medyaları eklendi.</li>
+                        <li>Studio kolaj sistemi 1-10 fotoğraf ve özel oran destekli hale getirildi.</li>
+                        <li>Comp AI tarama motoru arayüzü hızlandırıldı.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- STUDIO (Kolaj & Arka Plan) -->
+        <section id="tab-studio" class="tab-content">
+            <h2 class="text-2xl font-bold mb-4">Ruler Studio</h2>
+            
+            <div class="flex gap-2 mb-6 bg-gray-800 p-1 rounded-lg">
+                <button onclick="switchStudioTab('collage')" id="btn-collage" class="flex-1 py-2 rounded bg-rulerblue text-black font-bold transition">Kolaj Yapıcı</button>
+                <button onclick="switchStudioTab('bgrm')" id="btn-bgrm" class="flex-1 py-2 rounded text-white hover:bg-gray-700 transition">Arka Plan Silici</button>
+            </div>
+
+            <!-- Kolaj Yapıcı -->
+            <div id="studio-collage" class="bg-darkcard p-5 rounded-xl border border-gray-700">
+                <h3 class="font-bold mb-4">Gelişmiş Kolaj (1-10 Fotoğraf)</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Fotoğrafları Seç (Max 10)</label>
+                        <input type="file" id="collage-files" multiple accept="image/*" onchange="updateCollagePreview()" class="w-full bg-gray-800 p-3 rounded border border-gray-700 focus:border-rulerblue outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Ekran Oranı</label>
+                        <select id="collage-ratio" onchange="updateCollagePreview()" class="w-full bg-gray-800 p-3 rounded border border-gray-700 focus:border-rulerblue outline-none">
+                            <option value="1/1">1:1 (Kare - Instagram)</option>
+                            <option value="16/9">16:9 (Yatay - YouTube/PC)</option>
+                            <option value="9/16">9:16 (Dikey - Reels/TikTok)</option>
+                            <option value="4/3">4:3 (Standart)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="generateCollage()" class="w-full bg-rulerblue text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(0,229,255,0.4)]">Kolajı Oluştur</button>
+
+                    <div class="mt-6 border border-dashed border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center min-h-[200px]">
+                        <p class="text-gray-500 mb-3 text-sm" id="collage-status-text">Önizleme burada görünecek</p>
+                        <div id="collage-preview-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arka Plan Silici -->
+            <div id="studio-bgrm" class="bg-darkcard p-5 rounded-xl border border-gray-700 hidden">
+                <h3 class="font-bold mb-4">Yapay Zeka Arka Plan Silici</h3>
+                <div class="space-y-4">
+                    <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-rulerblue transition cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-300 font-semibold">Fotoğraf Yükle (.JPG, .PNG)</p>
+                        <p class="text-xs text-gray-500 mt-2">En iyi sonuç için obje/insan net olmalıdır.</p>
+                        <input type="file" class="hidden" id="bg-upload">
+                    </div>
+                    <button class="w-full bg-rulerblue text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition">Arka Planı Temizle</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMP AI -->
+        <section id="tab-compai" class="tab-content">
+            <h2 class="text-2xl font-bold mb-1">Comp AI</h2>
+            <p class="text-gray-400 text-sm mb-6">Otomatik Oyuncu Sahnesi Tarama ve Kesme Motoru</p>
+
+            <div class="bg-darkcard p-5 rounded-xl border border-gray-700 space-y-5">
+                <div>
+                    <label class="block text-sm font-bold mb-2">1. Maç Videosu Seç (.MP4 - Max 10 GB)</label>
+                    <input type="file" accept="video/mp4" class="w-full bg-gray-800 p-3 rounded border border-gray-700 focus:border-rulerblue">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">2. Hedef Oyuncu Fotoğrafı (.JPG)</label>
+                    <input type="file" accept="image/jpeg, image/png" class="w-full bg-gray-800 p-3 rounded border border-gray-700 focus:border-rulerblue">
+                    <p class="text-xs text-gray-500 mt-1">* OpenCV Yüz ve Form Tanıma için net bir fotoğraf seçin.</p>
+                </div>
+
+                <button onclick="startCompAI()" id="btn-start-ai" class="w-full bg-gradient-to-r from-rulerblue to-blue-500 text-black font-bold py-4 rounded-lg text-lg hover:opacity-90 transition shadow-[0_0_20px_rgba(0,229,255,0.3)]">Taramayı ve Klipleştirmeyi Başlat</button>
+
+                <!-- Terminal / İlerleme Ekranı -->
+                <div id="ai-terminal" class="hidden bg-black p-4 rounded-lg font-mono text-xs text-green-400 h-40 overflow-y-auto border border-gray-800 mt-4">
+                    <div>> Sistem başlatılıyor...</div>
+                    <div class="text-gray-500">> Video yükleniyor, lütfen bekleyin...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRESETLER -->
+        <section id="tab-presets" class="tab-content">
+            <h2 class="text-2xl font-bold mb-1">Preset Arşivi</h2>
+            <p class="text-gray-400 text-sm mb-6">After Effects, Alight Motion ve CapCut hazır ayarları.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Gerçekçi Preset Örneği (Video/Foto Destekli) -->
+                <div class="bg-darkcard border border-gray-700 rounded-xl overflow-hidden">
+                    <!-- Medya Önizleme Alanı -->
+                    <div class="h-40 bg-gray-800 relative flex items-center justify-center">
+                        <img src="https://via.placeholder.com/600x300/1e293b/00e5ff?text=Smooth+Velocity+Preview" class="w-full h-full object-cover" alt="Preview">
+                        <div class="absolute top-2 left-2 bg-black/60 text-xs px-2 py-1 rounded text-white border border-gray-600">After Effects</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg">Smooth Velocity 2026</h3>
+                        <p class="text-sm text-gray-400 mb-3 mt-1">Profesyonel akıcı geçiş ve hızlandırma preseti.</p>
+                        <p class="text-xs text-rulerblue mb-4">Özellikler: 1080p 60FPS - 35MB</p>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded transition flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-download"></i> İndir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KLİPLER -->
+        <section id="tab-clips" class="tab-content">
+            <h2 class="text-2xl font-bold mb-1">Ham Klipler Arşivi</h2>
+            <p class="text-gray-400 text-sm mb-6">Editler için yüksek kaliteli ham maç ve oyuncu klipleri.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Klip Örneği -->
+                <div class="bg-darkcard border border-gray-700 rounded-xl overflow-hidden">
+                    <div class="h-40 bg-gray-800 relative group cursor-pointer">
+                        <!-- Video Thumbnail Mock -->
+                        <img src="https://via.placeholder.com/400x250/0f172a/ffffff?text=UCL+Match+Clip" class="w-full h-full object-cover group-hover:opacity-50 transition" alt="Clip">
+                        <i class="fa-solid fa-play absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl text-white opacity-80 group-hover:opacity-100"></i>
+                        <div class="absolute bottom-2 right-2 bg-black/80 text-xs px-1.5 py-0.5 rounded">00:45</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold">UCL Yarı Final Ham Görüntü</h3>
+                        <p class="text-xs text-rulerblue mt-1 mb-3">4K 60FPS - Log Color</p>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded transition flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-download"></i> İndir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMİN PANELİ (Sadece Yetkililer) -->
+        <section id="tab-admin" class="tab-content hidden">
+            <div class="bg-rulerred/10 border border-rulerred rounded-xl p-5 mb-6">
+                <h2 class="text-2xl font-bold text-rulerred flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i> Yönetici Paneli
+                </h2>
+                <p class="text-sm text-gray-400 mt-1">Sadece yetkili hesaplar bu alanı görebilir.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- İçerik Ekleme Modülü -->
+                <div class="bg-darkcard p-5 rounded-xl border border-gray-700">
+                    <h3 class="font-bold text-lg mb-4">Sisteme İçerik Ekle (Preset/Klip)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">İçerik Türü</label>
+                            <select class="w-full bg-gray-800 p-3 rounded border border-gray-700 outline-none">
+                                <option>Preset Ekle</option>
+                                <option>Klip Ekle</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                            <input type="text" placeholder="Örn: 4K Twixor Klip" class="w-full bg-gray-800 p-3 rounded border border-gray-700 outline-none">
+                        </div>
+                        <div>
+                            <!-- YENİ: MEDYA EKLEME -->
+                            <label class="block text-sm text-rulerblue font-bold mb-1">Önizleme Medyası (Fotoğraf/Video)</label>
+                            <input type="file" accept="image/*, video/*" class="w-full bg-gray-800 p-3 rounded border border-gray-700 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">İndirme Linki (Drive/Dosya)</label>
+                            <input type="text" placeholder="https://" class="w-full bg-gray-800 p-3 rounded border border-gray-700 outline-none">
+                        </div>
+                        <button class="w-full bg-rulerred text-white font-bold py-3 rounded-lg hover:bg-red-600 transition">Sisteme Yükle</button>
+                    </div>
+                </div>
+
+                <!-- Onay Bekleyenler -->
+                <div class="bg-darkcard p-5 rounded-xl border border-gray-700">
+                    <h3 class="font-bold text-lg mb-4">Premium Onay Bekleyenler</h3>
+                    <div class="text-gray-500 text-sm text-center py-10 border border-dashed border-gray-600 rounded">
+                        Şu anda onay bekleyen talep yok.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ALT/YAN MENÜ -->
+    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-darkcard border-t border-gray-800 flex justify-around items-center p-2 z-40">
+        <button onclick="switchTab('home')" class="nav-btn text-gray-400 hover:text-rulerblue flex flex-col items-center p-2 active-nav text-rulerblue" data-target="home">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] mt-1 md:hidden">Ana Sayfa</span>
+            <span class="hidden md:inline font-semibold">Ana Sayfa</span>
+        </button>
+        <button onclick="switchTab('studio')" class="nav-btn text-gray-400 hover:text-rulerblue flex flex-col items-center p-2" data-target="studio">
+            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+            <span class="text-[10px] mt-1 md:hidden">Studio</span>
+            <span class="hidden md:inline font-semibold">Studio</span>
+        </button>
+        <button onclick="switchTab('compai')" class="nav-btn text-gray-400 hover:text-rulerblue flex flex-col items-center p-2" data-target="compai">
+            <i class="fa-solid fa-microchip text-xl"></i>
+            <span class="text-[10px] mt-1 md:hidden">Comp AI</span>
+            <span class="hidden md:inline font-semibold">Comp AI</span>
+        </button>
+        <button onclick="switchTab('presets')" class="nav-btn text-gray-400 hover:text-rulerblue flex flex-col items-center p-2" data-target="presets">
+            <i class="fa-solid fa-folder-open text-xl"></i>
+            <span class="text-[10px] mt-1 md:hidden">Presetler</span>
+            <span class="hidden md:inline font-semibold">Presetler</span>
+        </button>
+        <button onclick="switchTab('clips')" class="nav-btn text-gray-400 hover:text-rulerblue flex flex-col items-center p-2" data-target="clips">
+            <i class="fa-solid fa-film text-xl"></i>
+            <span class="text-[10px] mt-1 md:hidden">Klipler</span>
+            <span class="hidden md:inline font-semibold">Klipler</span>
+        </button>
+        <!-- Admin Butonu Sadece Admin Girişi Varsa Görünür -->
+        <button id="nav-admin-btn" onclick="switchTab('admin')" class="nav-btn text-gray-400 hover:text-rulerred flex flex-col items-center p-2 hidden" data-target="admin">
+            <i class="fa-solid fa-shield text-xl text-rulerred"></i>
+            <span class="text-[10px] mt-1 text-rulerred md:hidden">Admin</span>
+            <span class="hidden md:inline font-semibold text-rulerred">Yönetici</span>
+        </button>
+    </nav>
+
+    <!-- GERİ BİLDİRİM FAB (Yüzen Buton) -->
+    <button onclick="document.getElementById('feedback-modal').classList.remove('hidden')" class="fab bg-rulerblue text-black w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.5)]">
+        <i class="fa-solid fa-comment-dots text-2xl"></i>
+    </button>
+
+    <!-- GERİ BİLDİRİM MODAL -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-darkcard border border-gray-700 w-full max-w-md rounded-xl p-6 relative">
+            <button onclick="document.getElementById('feedback-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-paper-plane text-rulerblue"></i> Geri Bildirim Gönder</h3>
+            <p class="text-sm text-gray-400 mb-4">Hata bildirimi, özellik talebi veya genel mesajlarınızı buradan yöneticiye iletebilirsiniz.</p>
+            <textarea class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-rulerblue outline-none resize-none h-32 mb-4" placeholder="Mesajınızı yazın..."></textarea>
+            <button class="w-full bg-rulerblue text-black font-bold py-3 rounded-lg hover:bg-cyan-400 transition" onclick="alert('Geri bildirim gönderildi!'); document.getElementById('feedback-modal').classList.add('hidden');">Gönder</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT İŞLEMLERİ -->
+    <script>
+        let isAdmin = false; // Başlangıçta Free kullanıcı
+
+        // Sekme Değiştirme Sistemi
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-rulerblue');
+                if(btn.dataset.target === tabId) {
+                    if(tabId === 'admin') btn.classList.add('text-rulerred');
+                    else btn.classList.add('text-rulerblue');
+                }
+            });
+        }
+
+        // Studio Alt Sekme Sistemi
+        function switchStudioTab(type) {
+            document.getElementById('studio-collage').classList.add('hidden');
+            document.getElementById('studio-bgrm').classList.add('hidden');
+            
+            document.getElementById('btn-collage').className = "flex-1 py-2 rounded text-white hover:bg-gray-700 transition";
+            document.getElementById('btn-bgrm').className = "flex-1 py-2 rounded text-white hover:bg-gray-700 transition";
+
+            if(type === 'collage') {
+                document.getElementById('studio-collage').classList.remove('hidden');
+                document.getElementById('btn-collage').className = "flex-1 py-2 rounded bg-rulerblue text-black font-bold transition";
+            } else {
+                document.getElementById('studio-bgrm').classList.remove('hidden');
+                document.getElementById('btn-bgrm').className = "flex-1 py-2 rounded bg-rulerblue text-black font-bold transition";
+            }
+        }
+
+        // Admin Giriş/Çıkış Simülasyonu
+        function toggleAdmin() {
+            isAdmin = !isAdmin;
+            const badge = document.getElementById('user-role-badge');
+            const adminBtn = document.getElementById('nav-admin-btn');
+            const adminTab = document.getElementById('tab-admin');
+            
+            if(isAdmin) {
+                badge.innerHTML = '<i class="fa-solid fa-shield"></i> ADMIN';
+                badge.className = "bg-red-900/50 border border-red-500 text-xs px-2 py-1 rounded font-bold text-red-400";
+                adminBtn.classList.remove('hidden');
+            } else {
+                badge.innerHTML = '<i class="fa-solid fa-user"></i> FREE';
+                badge.className = "bg-gray-700 text-xs px-2 py-1 rounded font-semibold text-gray-300";
+                adminBtn.classList.add('hidden');
+                if(adminTab.classList.contains('active')) switchTab('home'); // Admindeyken çıkış yaparsa anasayfaya at
+            }
+        }
+
+        // Kolaj Önizleme Motoru
+        function updateCollagePreview() {
+            const files = document.getElementById('collage-files').files;
+            const previewGrid = document.getElementById('collage-preview-grid');
+            const statusText = document.getElementById('collage-status-text');
+            const ratioSelect = document.getElementById('collage-ratio').value;
+            
+            previewGrid.innerHTML = '';
+            
+            if(files.length === 0) {
+                statusText.style.display = 'block';
+                return;
+            }
+            if(files.length > 10) {
+                alert("En fazla 10 fotoğraf seçebilirsiniz!");
+                document.getElementById('collage-files').value = '';
+                return;
+            }
+
+            statusText.style.display = 'none';
+            previewGrid.style.aspectRatio = ratioSelect;
+
+            // Css Grid Ayarlama Algoritması (Dosya sayısına göre dinamik)
+            let cols = 1;
+            if(files.length === 2) cols = 2;
+            else if(files.length >= 3 && files.length <= 4) cols = 2;
+            else if(files.length >= 5 && files.length <= 6) cols = 3;
+            else if(files.length >= 7 && files.length <= 9) cols = 3;
+            else if(files.length === 10) cols = 4;
+            
+            previewGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            for(let i = 0; i < files.length; i++) {
+                const url = URL.createObjectURL(files[i]);
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'collage-item';
+                previewGrid.appendChild(img);
+            }
+        }
+
+        function generateCollage() {
+            if(document.getElementById('collage-files').files.length === 0) {
+                alert("Önce fotoğraf seçmelisin!");
+                return;
+            }
+            alert("Kolaj oluşturuluyor ve indiriliyor... (Backend bağlantısı bekleniyor)");
+        }
+
+        // Comp AI Simülasyonu (Arka plan OpenCV hissiyatı)
+        function startCompAI() {
+            const term = document.getElementById('ai-terminal');
+            const btn = document.getElementById('btn-start-ai');
+            
+            term.classList.remove('hidden');
+            term.innerHTML = '<div class="text-white">> OpenCV Yüz ve Form Tanıma Motoru Başlatılıyor...</div>';
+            btn.innerText = "İşleniyor...";
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            let steps = [
+                { time: 1000, text: "> Video ayrıştırılıyor... (Karelere bölünüyor)", color: "text-gray-400" },
+                { time: 2500, text: "> Hedef oyuncu referans noktaları çıkarıldı. [MATCH_RATE: %98.4]", color: "text-blue-400" },
+                { time: 4000, text: "> Sahneler taranıyor... %12", color: "text-yellow-400" },
+                { time: 5000, text: "> Sahneler taranıyor... %47", color: "text-yellow-400" },
+                { time: 6500, text: "> Sahneler taranıyor... %89", color: "text-yellow-400" },
+                { time: 8000, text: "> Klipler kesiliyor ve birleştiriliyor...", color: "text-gray-400" },
+                { time: 9500, text: "> İŞLEM TAMAMLANDI! Sonuç klip hazır.", color: "text-green-500 font-bold" }
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    term.innerHTML += `<div class="${step.color}">${step.text}</div>`;
+                    term.scrollTop = term.scrollHeight; // Otomatik aşağı kaydır
+                    if(step.text.includes("TAMAMLANDI")) {
+                        btn.innerText = "İşlem Bitti - İndir";
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.classList.replace('from-rulerblue', 'from-green-400');
+                        btn.classList.replace('to-blue-500', 'to-green-600');
+                        btn.onclick = () => alert('Klip indiriliyor...');
+                    }
+                }, step.time);
+            });
+        }
+    </script>
+</body>
+</html>
