@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruler PREMIUM | Profesyonel Editör Stüdyosu</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 500: '#00f2fe', 600: '#4facfe', dark: '#0a0f1c', card: '#111827' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body { background-color: #050810; color: #e5e7eb; font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
+    .text-gradient { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .bg-gradient-brand { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); }
+    .hero-glow { position: absolute; width: 400px; height: 400px; background: #00f2fe; filter: blur(150px); opacity: 0.15; top: -100px; left: 50%; transform: translateX(-50%); z-index: -1; pointer-events: none; }
+    /* Hide scrollbar for clean UI */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050810; }
+    ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative selection:bg-brand-500 selection:text-black">
+
+  <div class="hero-glow"></div>
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 w-full z-50 glass border-b border-gray-800/80">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between h-16">
+      
+      <!-- LOGO -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-brand flex items-center justify-center font-black text-black text-lg shadow-[0_0_15px_rgba(0,242,254,0.3)]">
+          R
+        </div>
+        <span class="text-xl font-black tracking-tight">Ruler <span class="text-gradient">PREMIUM</span></span>
+      </div>
+
+      <!-- DESKTOP MENU -->
+      <div class="hidden md:flex items-center gap-1 bg-gray-900/50 p-1 rounded-full border border-gray-800">
+        <button onclick="switchTab('home')" id="nav-home" class="px-5 py-2 rounded-full text-sm font-semibold transition-all text-white bg-gray-800">Ana Sayfa</button>
+        <button onclick="switchTab('studio')" id="nav-studio" class="px-5 py-2 rounded-full text-sm font-semibold transition-all text-gray-400 hover:text-white">Studio</button>
+        <button onclick="switchTab('comp')" id="nav-comp" class="px-5 py-2 rounded-full text-sm font-semibold transition-all text-gray-400 hover:text-white">Comp AI <span class="text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span></button>
+        <button onclick="switchTab('admin')" id="nav-admin" class="hidden px-5 py-2 rounded-full text-sm font-semibold transition-all text-amber-400 hover:bg-amber-500/10">Admin</button>
+      </div>
+
+      <!-- USER & AUTH BUTTON -->
+      <div class="flex items-center gap-3">
+        <div id="user-badge" class="hidden items-center gap-2 px-3 py-1.5 bg-gray-900 rounded-lg border border-gray-700">
+          <i data-lucide="user" class="w-4 h-4 text-brand-500"></i>
+          <span id="user-name" class="text-sm font-semibold">User</span>
+          <span id="user-role" class="text-[10px] px-2 py-0.5 rounded font-black bg-gray-800 text-gray-400">FREE</span>
+        </div>
+        <button id="auth-btn" onclick="openModal('auth-modal')" class="px-5 py-2 text-sm font-bold bg-white text-black rounded-full hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+          Giriş Yap
+        </button>
+      </div>
+      
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-grow pt-24 pb-12 px-4 w-full max-w-7xl mx-auto">
+
+    <!-- 1. ANA SAYFA (LANDING PAGE - HERKESE AÇIK) -->
+    <section id="tab-home" class="space-y-24 animate-fade-in block">
+      
+      <!-- HERO -->
+      <div class="text-center max-w-4xl mx-auto mt-12 space-y-6">
+        <div class="inline-block px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-500 text-sm font-bold mb-4">
+          Futbol Editörlerinin Yeni Nesil Çalışma Alanı 🚀
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-tight">
+          Editte Sınırları Kaldır, <br>
+          <span class="text-gradient">Zaman Kazan.</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+          Comp AI ile maçlardan otomatik klipler çıkar, yapay zeka ile arka planları tek tıkla sil, saniyeler içinde şaheserler yarat.
+        </p>
+        <div class="pt-6 flex items-center justify-center gap-4">
+          <button onclick="checkAccessAndGo('studio')" class="px-8 py-4 bg-gradient-brand text-black font-black text-lg rounded-full hover:scale-105 transition-transform shadow-[0_10px_30px_rgba(0,242,254,0.3)]">
+            Hemen Kullanmaya Başla
+          </button>
+          <button onclick="switchTab('comp')" class="px-8 py-4 bg-gray-900 border border-gray-700 text-white font-bold text-lg rounded-full hover:bg-gray-800 transition-all">
+            Comp AI Nedir?
+          </button>
+        </div>
+      </div>
+
+      <!-- FEATURES GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-brand-500/50 transition-colors">
+          <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20">
+            <i data-lucide="cpu" class="text-blue-400 w-7 h-7"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-white">Comp AI Engine <span class="bg-amber-500 text-black text-xs px-2 py-1 rounded ml-2">PRO</span></h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Saatlerce maç izlemeye son. Videoyu ve oyuncu fotoğrafını yükle, yapay zeka senin için o oyuncunun kliplerini otomatik çıkarsın.</p>
+        </div>
+        <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-brand-500/50 transition-colors">
+          <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/20">
+            <i data-lucide="scissors" class="text-purple-400 w-7 h-7"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-white">Arka Plan Silici</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Oyuncu görsellerindeki istenmeyen arka planları tek tıkla şeffaflaştır. Kendi özel algoritmamızla tarayıcı üzerinde hızlı işlem.</p>
+        </div>
+        <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-brand-500/50 transition-colors">
+          <div class="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/20">
+            <i data-lucide="layout" class="text-emerald-400 w-7 h-7"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-white">Hızlı Kolaj Yapıcı</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Edit öncesi görsellerini hızlıca yan yana veya ızgara şeklinde birleştir, sosyal medyaya saniyeler içinde hazır et.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. RULER STUDIO (GİRİŞ YAPANLARA AÇIK) -->
+    <section id="tab-studio" class="hidden space-y-6">
+      
+      <!-- KİLİT EKRANI (KAYITSIZLAR İÇİN) -->
+      <div id="studio-locked" class="glass rounded-3xl p-12 text-center max-w-2xl mx-auto mt-10 border border-gray-800">
+        <i data-lucide="lock" class="w-16 h-16 text-gray-500 mx-auto mb-4"></i>
+        <h2 class="text-2xl font-black mb-3">Bu Alan Üyelere Özeldir</h2>
+        <p class="text-gray-400 mb-8">Ruler Studio araçlarını kullanabilmek için ücretsiz kayıt olmanız gerekmektedir.</p>
+        <button onclick="openModal('auth-modal')" class="px-8 py-3 bg-white text-black font-bold rounded-full hover:bg-gray-200">Giriş Yap veya Kayıt Ol</button>
+      </div>
+
+      <!-- ÇALIŞMA ALANI (GİRİŞ YAPANLAR İÇİN) -->
+      <div id="studio-workspace" class="hidden glass rounded-3xl border border-gray-800 overflow-hidden">
+        <div class="border-b border-gray-800 bg-gray-900/50 p-6">
+          <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="sparkles" class="text-brand-500"></i> Ruler Studio</h2>
+          <p class="text-gray-400 text-sm mt-1">İstemci taraflı görsel işleme araçları. (Sunucuya veri gönderilmez, hızlıdır.)</p>
+        </div>
+        
+        <div class="p-6">
+          <!-- ARAÇ SEÇİMİ -->
+          <div class="flex gap-2 mb-8 bg-gray-900 p-1 rounded-xl w-max border border-gray-800">
+            <button onclick="toggleTool('collage')" id="btn-collage" class="px-6 py-2 rounded-lg text-sm font-bold bg-gray-800 text-white">Kolaj Yapıcı</button>
+            <button onclick="toggleTool('bg')" id="btn-bg" class="px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white">Arka Plan Silici</button>
+          </div>
+
+          <!-- KOLAJ ARACI -->
+          <div id="tool-collage" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="space-y-5 bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
+              <div>
+                <label class="block text-sm font-bold text-gray-300 mb-2">1. Görselleri Seç (Max 4)</label>
+                <input type="file" id="collage-input" multiple accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-white cursor-pointer hover:file:bg-gray-700">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-300 mb-2">2. Düzen</label>
+                <select id="collage-layout" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500">
+                  <option value="2-side">2'li Yan Yana</option>
+                  <option value="2-top">2'li Üst Üste</option>
+                  <option value="4-grid">4'lü Izgara</option>
+                </select>
+              </div>
+              <button onclick="generateCollage()" class="w-full py-3 bg-brand-500 text-black font-black rounded-lg hover:bg-brand-600">Kolajı Oluştur</button>
+            </div>
+            <div class="lg:col-span-2 bg-gray-900/30 rounded-2xl border border-dashed border-gray-700 p-4 flex flex-col items-center justify-center min-h-[400px]">
+              <canvas id="collage-canvas" class="max-w-full max-h-[500px] rounded-lg shadow-2xl hidden"></canvas>
+              <p id="collage-placeholder" class="text-gray-500 text-sm flex flex-col items-center gap-2"><i data-lucide="image" class="w-8 h-8"></i> Önizleme burada görünecek</p>
+              <a id="collage-dl" class="hidden mt-6 px-6 py-2 bg-white text-black font-bold rounded-full">İndir (.PNG)</a>
+            </div>
+          </div>
+
+          <!-- BG ARACI -->
+          <div id="tool-bg" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="space-y-5 bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
+              <div>
+                <label class="block text-sm font-bold text-gray-300 mb-2">Görsel Seç</label>
+                <input type="file" id="bg-input" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-white cursor-pointer hover:file:bg-gray-700">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-300 mb-2">Hassasiyet</label>
+                <input type="range" id="bg-tolerance" min="10" max="100" value="30" class="w-full accent-brand-500">
+              </div>
+              <button onclick="processBg()" class="w-full py-3 bg-purple-500 text-white font-black rounded-lg hover:bg-purple-600">Arka Planı Sil</button>
+            </div>
+            <div class="lg:col-span-2 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAACVJREFUKFNjZCASMDKgAhgZGRn/M2IQxKqQ2DQVwqP5hxJ8FAAAkGQEwR5zWc0AAAAASUVORK5CYII=')] rounded-2xl border border-dashed border-gray-700 p-4 flex flex-col items-center justify-center min-h-[400px]">
+              <canvas id="bg-canvas" class="max-w-full max-h-[500px] rounded-lg shadow-2xl hidden bg-transparent"></canvas>
+              <p id="bg-placeholder" class="text-gray-500 text-sm flex flex-col items-center gap-2 bg-gray-900 p-4 rounded-xl"><i data-lucide="scissors" class="w-8 h-8"></i> İşlenmiş görsel burada görünecek</p>
+              <a id="bg-dl" class="hidden mt-6 px-6 py-2 bg-white text-black font-bold rounded-full">Şeffaf Olarak İndir (.PNG)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. COMP AI (SADECE VIP/PREMIUM VEYA ONAY BEKLEYENLER) -->
+    <section id="tab-comp" class="hidden space-y-6">
+      
+      <!-- KİLİTLİ / BAŞVURU EKRANI (Normal Giriş Yapanlar İçin) -->
+      <div id="comp-locked" class="glass rounded-3xl p-8 md:p-12 text-center max-w-3xl mx-auto mt-10 border border-amber-500/30 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+        <i data-lucide="crown" class="w-20 h-20 text-amber-500 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]"></i>
+        <h2 class="text-3xl font-black mb-4">Comp AI & Premium Erişim</h2>
+        <p class="text-gray-400 mb-8 max-w-xl mx-auto">
+          Otomatik klip çıkarıcı (Comp AI) ve Premium arşive erişmek için yönetici onayı gereklidir. Lütfen iletişimde kalmak ve onay almak için <b>Gmail adresinizi</b> girin.
+        </p>
+
+        <!-- BAŞVURU FORMU -->
+        <div id="comp-request-form" class="max-w-md mx-auto space-y-4">
+          <input type="email" id="req-email" placeholder="ornek@gmail.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-5 py-4 text-center focus:border-amber-500 focus:outline-none text-lg">
+          <button onclick="requestPremium()" class="w-full py-4 bg-amber-500 text-black font-black text-lg rounded-xl hover:bg-amber-400 transition-colors shadow-[0_5px_20px_rgba(245,158,11,0.2)]">
+            Premium Onayı İste
+          </button>
+        </div>
+
+        <!-- BEKLEMEDE DURUMU -->
+        <div id="comp-pending-status" class="hidden max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 p-6 rounded-2xl">
+          <i data-lucide="clock" class="w-10 h-10 text-amber-500 mx-auto mb-3 animate-pulse"></i>
+          <h3 class="text-amber-500 font-bold text-lg mb-1">Başvurunuz İnceleniyor</h3>
+          <p class="text-amber-200/70 text-sm">Yönetici onay verdiğinde bu sistem otomatik olarak açılacaktır. Lütfen daha sonra tekrar kontrol edin.</p>
+        </div>
+
+        <!-- GİRİŞ YAPMAMIŞ KULLANICI UYARISI -->
+        <div id="comp-no-auth" class="hidden">
+           <button onclick="openModal('auth-modal')" class="px-8 py-3 bg-white text-black font-bold rounded-full">Önce Giriş Yapın</button>
+        </div>
+      </div>
+
+      <!-- COMP AI ÇALIŞMA ALANI (ONAYLI KULLANICILAR İÇİN) -->
+      <div id="comp-workspace" class="hidden glass rounded-3xl border border-brand-500/30 overflow-hidden">
+        <div class="border-b border-gray-800 bg-gray-900/80 p-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="cpu" class="text-brand-500"></i> Comp AI Engine</h2>
+            <p class="text-gray-400 text-sm mt-1">Yapay zeka tabanlı otomatik maç içi kesit (klip) çıkarıcı.</p>
+          </div>
+          <span class="bg-amber-500 text-black px-3 py-1 rounded-full text-xs font-black">PREMIUM AKTİF</span>
+        </div>
+        
+        <div class="p-8 space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800">
+              <label class="block font-bold text-gray-300 mb-4">1. Maç Videosu Seç (.MP4)</label>
+              <input type="file" accept="video/mp4" class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-gray-800 file:text-white cursor-pointer">
+            </div>
+            <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800">
+              <label class="block font-bold text-gray-300 mb-4">2. Hedef Oyuncu Seç (.JPG)</label>
+              <input type="file" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-gray-800 file:text-white cursor-pointer">
+            </div>
+          </div>
+
+          <button onclick="simulateCompScan()" class="w-full py-4 bg-gradient-brand text-black font-black text-xl rounded-2xl hover:scale-[1.02] transition-transform">
+            Taramayı Başlat
+          </button>
+
+          <!-- TARAMA DURUMU (SİMÜLASYON) -->
+          <div id="comp-status-box" class="hidden bg-black p-6 rounded-2xl border border-gray-800 font-mono text-sm space-y-4">
+            <div class="flex justify-between text-brand-500 font-bold">
+              <span id="comp-log">> Sistem başlatılıyor... Yüz tanıma modülü aktif.</span>
+              <span id="comp-percent">0%</span>
+            </div>
+            <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden">
+              <div id="comp-bar" class="bg-brand-500 h-full w-0 transition-all duration-300 shadow-[0_0_10px_#00f2fe]"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PREMIUM ARŞİV (VİDEOLAR) -->
+        <div class="border-t border-gray-800 bg-gray-900/50 p-8">
+          <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="archive" class="text-amber-500"></i> Premium Arşiv Klipleri</h3>
+          <div id="premium-clips-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <!-- JS Dolduracak -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ADMIN PANELİ (SADECE ADMIN) -->
+    <section id="tab-admin" class="hidden space-y-6 animate-fade-in">
+      <div class="glass rounded-3xl border border-red-500/30 p-8">
+        <h2 class="text-2xl font-black flex items-center gap-2 text-red-500 mb-6">
+          <i data-lucide="shield-alert"></i> Yönetici Paneli
+        </h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <!-- ONAY BEKLEYENLER -->
+          <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+            <h3 class="font-bold text-lg mb-4 text-white">Premium Onayı Bekleyenler</h3>
+            <div id="admin-requests-list" class="space-y-3">
+               <!-- JS dolduracak -->
+            </div>
+          </div>
+
+          <!-- KLİP EKLEME -->
+          <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+            <h3 class="font-bold text-lg mb-2 text-white">Sisteme Premium Klip Ekle</h3>
+            <input type="text" id="add-clip-title" placeholder="Video Başlığı" class="w-full bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500">
+            <input type="text" id="add-clip-info" placeholder="Kalite/Boyut (Örn: 4K 60FPS - 2GB)" class="w-full bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500">
+            <input type="text" id="add-clip-url" placeholder="İndirme Linki (Drive vb.)" class="w-full bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500">
+            <button onclick="adminAddClip()" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl">Arşive Ekle</button>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-8 text-sm text-gray-600 border-t border-gray-800/50 glass mt-auto">
+    &copy; 2026 Ruler PREMIUM. Kapaklı, Tekirdağ. Tüm Hakları Saklıdır.
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="glass w-full max-w-sm rounded-3xl border border-gray-700 p-8 relative shadow-2xl">
+      <button onclick="closeModal('auth-modal')" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+        <i data-lucide="x"></i>
+      </button>
+
+      <div class="flex gap-4 mb-6 border-b border-gray-800 pb-4">
+        <button id="tab-login" onclick="toggleAuth('login')" class="text-lg font-bold text-brand-500">Giriş Yap</button>
+        <button id="tab-register" onclick="toggleAuth('register')" class="text-lg font-bold text-gray-500 hover:text-gray-300">Kayıt Ol</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="form-login" onsubmit="doLogin(event)" class="space-y-4">
+        <input type="text" id="log-user" required placeholder="Kullanıcı Adı" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:outline-none">
+        <input type="password" id="log-pass" required placeholder="Şifre" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:outline-none">
+        <button type="submit" class="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 mt-2">Giriş Yap</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="form-register" onsubmit="doRegister(event)" class="hidden space-y-4">
+        <input type="text" id="reg-user" required placeholder="Kullanıcı Adı Seç" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:outline-none">
+        <input type="password" id="reg-pass" required placeholder="Şifre Belirle" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:outline-none">
+        <button type="submit" class="w-full py-3 bg-brand-500 text-black font-bold rounded-xl hover:bg-brand-600 mt-2">Kayıt Ol & Başla</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // --- VERİTABANI SİMÜLASYONU (Local Storage) ---
+    /* 
+      Kullanıcı Rolleri: 'MEMBER', 'ADMIN'
+      Premium Durumu: 'NONE' (Yok), 'PENDING' (Onay Bekliyor), 'APPROVED' (Premium Açık)
+    */
+    let dbUsers = JSON.parse(localStorage.getItem('r_users')) || [
+      { user: 'admin', pass: '123', role: 'ADMIN', premStatus: 'APPROVED', email: 'admin@ruler.com' }
+    ];
+    let dbClips = JSON.parse(localStorage.getItem('r_clips')) || [
+      { id: 1, title: 'Mauro Icardi Tüm Dokunuşlar', info: '1080p 60FPS - 1.2GB', url: '#' },
+      { id: 2, title: 'Derbi Özeti (Ham Kayıt)', info: '4K UltraHD - 4.5GB', url: '#' }
+    ];
+    let currentUser = JSON.parse(localStorage.getItem('r_active')) || null;
+
+    function saveDB() {
+      localStorage.setItem('r_users', JSON.stringify(dbUsers));
+      localStorage.setItem('r_clips', JSON.stringify(dbClips));
+      localStorage.setItem('r_active', JSON.stringify(currentUser));
+    }
+
+    window.onload = () => {
+      updateUI();
+      // Başlangıçta ana sekmeyi aç
+      switchTab('home');
+    }
+
+    // --- TAB KONTROLLERİ ---
+    function switchTab(tabId) {
+      // Tüm tabları gizle
+      ['home', 'studio', 'comp', 'admin'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`nav-${t}`).className = "px-5 py-2 rounded-full text-sm font-semibold transition-all text-gray-400 hover:text-white";
+      });
+
+      // Seçileni göster
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      
+      // Nav stili
+      activeNav.className = "px-5 py-2 rounded-full text-sm font-semibold transition-all text-white bg-gray-800";
+
+      // İzin Kontrolleri (Her sekmeye tıklandığında ekranı duruma göre ayarlar)
+      if(tabId === 'studio') checkStudioAccess();
+      if(tabId === 'comp') checkCompAccess();
+      if(tabId === 'admin') renderAdmin();
+    }
+
+    function checkAccessAndGo(tab) {
+      switchTab(tab);
+      window.scrollTo(0,0);
+    }
+
+    // --- UI GÜNCELLEME (Giriş Durumuna Göre Navbar) ---
+    function updateUI() {
+      const authBtn = document.getElementById('auth-btn');
+      const badge = document.getElementById('user-badge');
+      const navAdmin = document.getElementById('nav-admin');
+
+      if (currentUser) {
+        authBtn.innerText = "Çıkış Yap";
+        authBtn.className = "px-5 py-2 text-sm font-bold bg-gray-800 text-white border border-gray-700 rounded-full hover:bg-red-500 hover:border-red-500 transition-all";
+        authBtn.onclick = () => { currentUser = null; saveDB(); location.reload(); };
+        
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+        document.getElementById('user-name').innerText = currentUser.user;
+        
+        const roleBadge = document.getElementById('user-role');
+        if(currentUser.role === 'ADMIN') {
+          roleBadge.innerText = "ADMIN";
+          roleBadge.className = "text-[10px] px-2 py-0.5 rounded font-black bg-red-500 text-white";
+          navAdmin.classList.remove('hidden');
+        } else if (currentUser.premStatus === 'APPROVED') {
+          roleBadge.innerText = "PREMIUM";
+          roleBadge.className = "text-[10px] px-2 py-0.5 rounded font-black bg-amber-500 text-black";
+          navAdmin.classList.add('hidden');
+        } else {
+          roleBadge.innerText = "FREE";
+          roleBadge.className = "text-[10px] px-2 py-0.5 rounded font-black bg-gray-800 text-gray-400";
+          navAdmin.classList.add('hidden');
+        }
+      } else {
+        authBtn.innerText = "Giriş Yap";
+        authBtn.className = "px-5 py-2 text-sm font-bold bg-white text-black rounded-full hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]";
+        authBtn.onclick = () => openModal('auth-modal');
+        badge.classList.add('hidden');
+        navAdmin.classList.add('hidden');
+      }
+    }
+
+    // --- ERİŞİM DENETİMLERİ ---
+    function checkStudioAccess() {
+      if(!currentUser) {
+        document.getElementById('studio-locked').classList.remove('hidden');
+        document.getElementById('studio-workspace').classList.add('hidden');
+      } else {
+        document.getElementById('studio-locked').classList.add('hidden');
+        document.getElementById('studio-workspace').classList.remove('hidden');
+      }
+    }
+
+    function checkCompAccess() {
+      const locked = document.getElementById('comp-locked');
+      const form = document.getElementById('comp-request-form');
+      const pending = document.getElementById('comp-pending-status');
+      const noAuth = document.getElementById('comp-no-auth');
+      const workspace = document.getElementById('comp-workspace');
+
+      if (!currentUser) {
+        // Giriş Yapmamış
+        workspace.classList.add('hidden');
+        locked.classList.remove('hidden');
+        form.classList.add('hidden');
+        pending.classList.add('hidden');
+        noAuth.classList.remove('hidden');
+      } else if (currentUser.premStatus === 'APPROVED' || currentUser.role === 'ADMIN') {
+        // Premium veya Admin
+        locked.classList.add('hidden');
+        workspace.classList.remove('hidden');
+        renderPremiumClips(); // Klipleri yükle
+      } else if (currentUser.premStatus === 'PENDING') {
+        // Onay bekliyor
+        workspace.classList.add('hidden');
+        locked.classList.remove('hidden');
+        form.classList.add('hidden');
+        noAuth.classList.add('hidden');
+        pending.classList.remove('hidden');
+      } else {
+        // Normal Üye (Başvuru yapmamış)
+        workspace.classList.add('hidden');
+        locked.classList.remove('hidden');
+        form.classList.remove('hidden');
+        noAuth.classList.add('hidden');
+        pending.classList.add('hidden');
+      }
+    }
+
+    // --- AUTH MODAL ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    
+    function toggleAuth(type) {
+      document.getElementById('form-login').classList.toggle('hidden', type !== 'login');
+      document.getElementById('form-register').classList.toggle('hidden', type !== 'register');
+      document.getElementById('tab-login').className = type === 'login' ? 'text-lg font-bold text-brand-500' : 'text-lg font-bold text-gray-500 hover:text-gray-300';
+      document.getElementById('tab-register').className = type === 'register' ? 'text-lg font-bold text-brand-500' : 'text-lg font-bold text-gray-500 hover:text-gray-300';
+    }
+
+    function doLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('log-user').value.trim();
+      const p = document.getElementById('log-pass').value.trim();
+      const user = dbUsers.find(x => x.user === u && x.pass === p);
+      if(user) {
+        currentUser = user; saveDB(); updateUI(); closeModal('auth-modal');
+        if(document.getElementById('tab-studio').classList.contains('hidden') === false) checkStudioAccess();
+        if(document.getElementById('tab-comp').classList.contains('hidden') === false) checkCompAccess();
+      } else { alert("Kullanıcı adı veya şifre hatalı!"); }
+    }
+
+    function doRegister(e) {
+      e.preventDefault();
+      const u = document.getElementById('reg-user').value.trim();
+      const p = document.getElementById('reg-pass').value.trim();
+      if(dbUsers.find(x => x.user === u)) return alert("Bu isim kullanılıyor!");
+      
+      const newUser = { user: u, pass: p, role: 'MEMBER', premStatus: 'NONE', email: '' };
+      dbUsers.push(newUser); currentUser = newUser; saveDB(); updateUI(); closeModal('auth-modal');
+      checkStudioAccess(); checkCompAccess();
+    }
+
+    // --- PREMIUM BAŞVURU SİSTEMİ ---
+    function requestPremium() {
+      const email = document.getElementById('req-email').value.trim();
+      if(!email.includes('@gmail.com')) return alert("Lütfen geçerli bir Gmail adresi girin.");
+      
+      // Kullanıcının veritabanındaki (dbUsers) kopyasını da güncellemeliyiz
+      const dbUserIndex = dbUsers.findIndex(x => x.user === currentUser.user);
+      dbUsers[dbUserIndex].premStatus = 'PENDING';
+      dbUsers[dbUserIndex].email = email;
+      
+      currentUser.premStatus = 'PENDING';
+      currentUser.email = email;
+      
+      saveDB();
+      checkCompAccess(); // Ekranı "Beklemede" state'ine geçir
+    }
+
+    // --- ADMIN İŞLEMLERİ ---
+    function renderAdmin() {
+      if(!currentUser || currentUser.role !== 'ADMIN') return;
+      
+      const list = document.getElementById('admin-requests-list');
+      const pendingUsers = dbUsers.filter(u => u.premStatus === 'PENDING');
+      
+      if(pendingUsers.length === 0) {
+        list.innerHTML = `<p class="text-sm text-gray-500 italic">Bekleyen başvuru yok.</p>`;
+        return;
+      }
+
+      list.innerHTML = pendingUsers.map(u => `
+        <div class="flex items-center justify-between bg-gray-800 p-3 rounded-xl border border-gray-700">
+          <div>
+            <div class="font-bold text-white text-sm">${u.user}</div>
+            <div class="text-xs text-amber-500">${u.email}</div>
+          </div>
+          <button onclick="approveUser('${u.user}')" class="px-4 py-1.5 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400">Onayla</button>
+        </div>
+      `).join('');
+    }
+
+    function approveUser(username) {
+      const userIndex = dbUsers.findIndex(x => x.user === username);
+      if(userIndex > -1) {
+        dbUsers[userIndex].premStatus = 'APPROVED';
+        saveDB();
+        renderAdmin(); // Listeyi yenile
+        alert(`${username} başarıyla Premium yapıldı!`);
+      }
+    }
+
+    function adminAddClip() {
+      const title = document.getElementById('add-clip-title').value;
+      const info = document.getElementById('add-clip-info').value;
+      const url = document.getElementById('add-clip-url').value;
+      if(!title || !url) return alert("Başlık ve link zorunlu!");
+      
+      dbClips.push({ id: Date.now(), title, info, url });
+      saveDB();
+      alert("Klip arşive eklendi!");
+      document.getElementById('add-clip-title').value = '';
+    }
+
+    function renderPremiumClips() {
+      const container = document.getElementById('premium-clips-list');
+      container.innerHTML = dbClips.map(c => `
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex justify-between items-center">
+          <div>
+            <h4 class="font-bold text-white text-sm">${c.title}</h4>
+            <p class="text-xs text-gray-400">${c.info}</p>
+          </div>
+          <a href="${c.url}" target="_blank" class="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-lg flex items-center justify-center hover:bg-amber-500 hover:text-black transition-colors">
+            <i data-lucide="download"></i>
+          </a>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // --- STUDIO ARAÇLARI (Görsellik ve Mantık) ---
+    function toggleTool(tool) {
+      document.getElementById('tool-collage').classList.toggle('hidden', tool !== 'collage');
+      document.getElementById('tool-bg').classList.toggle('hidden', tool !== 'bg');
+      
+      document.getElementById('btn-collage').className = tool === 'collage' ? 'px-6 py-2 rounded-lg text-sm font-bold bg-gray-800 text-white' : 'px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white';
+      document.getElementById('btn-bg').className = tool === 'bg' ? 'px-6 py-2 rounded-lg text-sm font-bold bg-gray-800 text-white' : 'px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white';
+    }
+
+    // Kolaj Üretici
+    function generateCollage() {
+      const input = document.getElementById('collage-input');
+      const layout = document.getElementById('collage-layout').value;
+      const canvas = document.getElementById('collage-canvas');
+      const ctx = canvas.getContext('2d');
+      const placeholder = document.getElementById('collage-placeholder');
+      const dlBtn = document.getElementById('collage-dl');
+
+      if (!input.files || input.files.length === 0) return alert("Görsel seçin!");
+
+      const files = Array.from(input.files).slice(0, 4);
+      let imgs = [], count = 0;
+
+      files.forEach((file, i) => {
+        const img = new Image();
+        img.onload = () => {
+          imgs[i] = img; count++;
+          if (count === files.length) {
+            canvas.width = 1200; canvas.height = 800;
+            ctx.fillStyle = "#050810"; ctx.fillRect(0,0,1200,800);
+            
+            if (layout === '2-side') {
+              if(imgs[0]) ctx.drawImage(imgs[0], 0, 0, 595, 800);
+              if(imgs[1]) ctx.drawImage(imgs[1], 605, 0, 595, 800);
+            } else if (layout === '2-top') {
+              if(imgs[0]) ctx.drawImage(imgs[0], 0, 0, 1200, 395);
+              if(imgs[1]) ctx.drawImage(imgs[1], 0, 405, 1200, 395);
+            } else {
+              if(imgs[0]) ctx.drawImage(imgs[0], 0, 0, 595, 395);
+              if(imgs[1]) ctx.drawImage(imgs[1], 605, 0, 595, 395);
+              if(imgs[2]) ctx.drawImage(imgs[2], 0, 405, 595, 395);
+              if(imgs[3]) ctx.drawImage(imgs[3], 605, 405, 595, 395);
+            }
+            
+            placeholder.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            dlBtn.classList.remove('hidden');
+            dlBtn.href = canvas.toDataURL('image/png');
+            dlBtn.download = 'ruler-kolaj.png';
+          }
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // Arka Plan Silici (Basit Algoritma)
+    function processBg() {
+      const input = document.getElementById('bg-input');
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      const tol = parseInt(document.getElementById('bg-tolerance').value);
+      
+      if(!input.files[0]) return alert("Görsel seçin!");
+      
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        const imgData = ctx.getImageData(0,0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const bgR = data[0], bgG = data[1], bgB = data[2]; // Sol üst pikseli referans al
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i+1], b = data[i+2];
+          const diff = Math.abs(r-bgR) + Math.abs(g-bgG) + Math.abs(b-bgB);
+          if (diff < tol * 3) data[i+3] = 0; // Şeffaf yap
+        }
+        
+        ctx.putImageData(imgData, 0, 0);
+        document.getElementById('bg-placeholder').classList.add('hidden');
+        canvas.classList.remove('hidden');
+        
+        const dlBtn = document.getElementById('bg-dl');
+        dlBtn.classList.remove('hidden');
+        dlBtn.href = canvas.toDataURL('image/png');
+        dlBtn.download = 'ruler-bg-silindi.png';
+      };
+      img.src = URL.createObjectURL(input.files[0]);
+    }
+
+    // Comp AI Simülasyonu
+    function simulateCompScan() {
+      const box = document.getElementById('comp-status-box');
+      const log = document.getElementById('comp-log');
+      const bar = document.getElementById('comp-bar');
+      const pct = document.getElementById('comp-percent');
+      
+      box.classList.remove('hidden');
+      let p = 0;
+      
+      const int = setInterval(() => {
+        p += 10;
+        bar.style.width = p + '%';
+        pct.innerText = p + '%';
+        
+        if(p===30) log.innerText = "> Videodaki yüzler taranıyor...";
+        if(p===60) log.innerText = "> Hedef oyuncu klipleri ayrıştırılıyor...";
+        if(p>=100) {
+          clearInterval(int);
+          log.innerText = "✓ İşlem tamamlandı! Çıktı klasörünüze kaydedildi.";
+          bar.classList.replace('bg-brand-500', 'bg-emerald-500');
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
