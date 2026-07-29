@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruler Productions | Comp AI & Preset Studio</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    body { background-color: #0b0f19; color: #f3f4f6; font-family: 'Inter', sans-serif; }
+    .glow-purple { box-shadow: 0 0 20px rgba(139, 92, 246, 0.35); }
+    .glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.35); }
+    .gradient-text { background: linear-gradient(135deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-card { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="glass-card sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-800">
+    <!-- RP LOGO -->
+    <div class="flex items-center space-x-3 cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-black text-white text-xl shadow-lg glow-purple">
+        RP
+      </div>
+      <div>
+        <h1 class="text-xl font-extrabold tracking-wider gradient-text">RULER PRODUCTIONS</h1>
+        <p class="text-xs text-gray-400 font-medium">Comp AI & Color Studio v2.5</p>
+      </div>
+    </div>
+
+    <!-- AUTH & PROFILE -->
+    <div class="flex items-center space-x-4" id="auth-section">
+      <button id="google-login-btn" onclick="loginWithGoogle()" class="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-lg text-sm font-semibold transition border border-gray-700">
+        <i class="fab fa-google text-red-400"></i>
+        <span>Gmail ile Giriş Yap</span>
+      </button>
+      <div id="user-profile" class="hidden flex items-center space-x-3">
+        <span id="user-email" class="text-xs text-purple-400 font-semibold bg-purple-950 px-3 py-1.5 rounded-full border border-purple-800"></span>
+        <button onclick="logout()" class="text-xs text-gray-400 hover:text-white transition">Çıkış</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- LEFT & CENTER: COMP AI VIDEO EDITOR -->
+    <section class="lg:col-span-2 space-y-6">
+      <div class="glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <i class="fas fa-brain text-cyan-400"></i>
+            <span>Comp AI Motoru (Üst Seviye Takip & Filtre)</span>
+          </h2>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">AI Active</span>
+        </div>
+
+        <!-- VIDEO DISPLAY & CANVAS -->
+        <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 flex items-center justify-center group" id="video-container">
+          <video id="main-video" class="hidden w-full h-full object-contain"></video>
+          <canvas id="ai-canvas" class="w-full h-full object-contain"></canvas>
+          
+          <div id="upload-placeholder" class="text-center p-6">
+            <i class="fas fa-file-video text-5xl text-purple-500/50 mb-3 animate-pulse"></i>
+            <p class="text-gray-300 font-medium">Analiz edilecek videoyu yükleyin</p>
+            <p class="text-xs text-gray-500 mt-1">MP4, WEBM veya MOV formatı desteklenir</p>
+            <label for="video-input" class="mt-4 inline-block bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold px-5 py-2.5 rounded-lg cursor-pointer transition glow-purple">
+              <i class="fas fa-upload mr-2"></i> Video Seç
+            </label>
+            <input type="file" id="video-input" accept="video/*" class="hidden">
+          </div>
+        </div>
+
+        <!-- CONTROL BAR -->
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+          <div class="flex items-center space-x-2">
+            <button id="play-btn" class="bg-cyan-600 hover:bg-cyan-500 text-white w-9 h-9 rounded-lg flex items-center justify-center transition">
+              <i class="fas fa-play"></i>
+            </button>
+            <button id="ai-toggle-btn" onclick="toggleAITracking()" class="bg-purple-900/60 hover:bg-purple-800 text-purple-300 text-xs px-3 py-2 rounded-lg border border-purple-700/50 font-semibold flex items-center gap-1.5">
+              <i class="fas fa-crosshair"></i>
+              <span>Oyuncu Odak Kutusu: <b id="ai-status-text">AÇIK</b></span>
+            </button>
+          </div>
+
+          <button id="export-btn" onclick="downloadFxVideo()" class="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-lg flex items-center gap-2">
+            <i class="fas fa-download"></i>
+            <span>FX Videoyu İndir</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SLIDERS CONTROL PANEL -->
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <h3 class="font-bold text-sm text-gray-300 uppercase tracking-wider border-b border-gray-800 pb-2">Renk & Görsel Ayarları</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-gray-400 flex justify-between"><span>Parlaklık</span><span id="val-brightness">100%</span></label>
+            <input type="range" id="fx-brightness" min="50" max="200" value="100" class="w-full accent-cyan-400">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 flex justify-between"><span>Kontrast</span><span id="val-contrast">100%</span></label>
+            <input type="range" id="fx-contrast" min="50" max="200" value="100" class="w-full accent-cyan-400">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 flex justify-between"><span>Doygunluk</span><span id="val-saturate">100%</span></label>
+            <input type="range" id="fx-saturate" min="0" max="300" value="100" class="w-full accent-cyan-400">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 flex justify-between"><span>Bulanıklık (Blur)</span><span id="val-blur">0px</span></label>
+            <input type="range" id="fx-blur" min="0" max="10" value="0" class="w-full accent-cyan-400">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDEBAR: GLOBAL PRESETS & COMMUNITY -->
+    <aside class="space-y-6">
+      <div class="glass-card rounded-2xl p-5 h-full flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+              <i class="fas fa-globe text-purple-400"></i>
+              <span>Ortak Preset Havuzu</span>
+            </h3>
+            <button onclick="fetchGlobalPresets()" class="text-xs text-cyan-400 hover:text-cyan-300">
+              <i class="fas fa-sync"></i>
+            </button>
+          </div>
+          <p class="text-xs text-gray-400 mb-4">Supabase üzerindeki tüm kullanıcıların paylaştığı hazır renk ayarları.</p>
+
+          <!-- PRESETS LIST -->
+          <div id="presets-container" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+            <div class="text-center py-8 text-gray-500 text-sm">Presetler yükleniyor...</div>
+          </div>
+        </div>
+
+        <!-- SAVE PRESET TO SUPABASE -->
+        <div class="mt-6 pt-4 border-t border-gray-800 space-y-3">
+          <input type="text" id="preset-title" placeholder="Preset Adı (örn: Ruler Cyber CC)" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-purple-500">
+          <button onclick="savePresetToSupabase()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm py-2 rounded-lg transition glow-purple flex items-center justify-center gap-2">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Topluluğa Paylaş</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- RENDER OVERLAY LOADER -->
+  <div id="render-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden">
+    <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <h3 class="text-lg font-bold text-white">Video İşleniyor & İndiriliyor...</h3>
+    <p class="text-sm text-gray-400 mt-1" id="render-progress-text">0%</p>
+    <div class="w-64 bg-gray-800 rounded-full h-2 mt-4 overflow-hidden">
+      <div id="render-bar" class="bg-cyan-500 h-full w-0 transition-all duration-150"></div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- 1. SUPABASE INIT ---
+    const SUPABASE_URL = 'https://ggdoskznbmvkgyhornui.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnZG9za3puYm12a2d5aG9ybnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4ODg4MDAsImV4cCI6MjAzMjQ2NDgwMH0.placeholder';
+    
+    let sb = null;
+    if (window.supabase) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // STATE MANAGEMENT
+    const state = {
+      video: document.getElementById('main-video'),
+      canvas: document.getElementById('ai-canvas'),
+      ctx: document.getElementById('ai-canvas').getContext('2d'),
+      aiTracking: true,
+      brightness: 100,
+      contrast: 100,
+      saturate: 100,
+      blur: 0,
+      currentUser: null
+    };
+
+    // LOCAL DEFAULT PRESETS
+    const localPresets = [
+      { title: "Ruler Neon CC", brightness: 110, contrast: 130, saturate: 160, blur: 0 },
+      { title: "Icardi Gold Glow", brightness: 120, contrast: 115, saturate: 140, blur: 0 },
+      { title: "Dark Cinematic", brightness: 90, contrast: 140, saturate: 85, blur: 0 }
+    ];
+
+    // --- 2. INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initSliders();
+      initVideoEvents();
+      checkUserSession();
+      fetchGlobalPresets();
+    });
+
+    // --- 3. AUTHENTICATION (SUPABASE & GMAIL) ---
+    async function checkUserSession() {
+      if(!sb) return;
+      const { data: { session } } = await sb.auth.getSession();
+      if(session && session.user) {
+        setUIUser(session.user);
+      }
+    }
+
+    async function loginWithGoogle() {
+      if(!sb) {
+        alert("Supabase istemcisi yüklenemedi. Lütfen internet bağlantınızı kontrol edin.");
+        return;
+      }
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+      if(error) alert("Giriş hatası: " + error.message);
+    }
+
+    async function logout() {
+      if(!sb) return;
+      await sb.auth.signOut();
+      document.getElementById('google-login-btn').classList.remove('hidden');
+      document.getElementById('user-profile').classList.add('hidden');
+      state.currentUser = null;
+    }
+
+    function setUIUser(user) {
+      state.currentUser = user;
+      document.getElementById('google-login-btn').classList.add('hidden');
+      const profile = document.getElementById('user-profile');
+      profile.classList.remove('hidden');
+      document.getElementById('user-email').textContent = user.email || 'Kullanıcı';
+    }
+
+    // --- 4. COMP AI ENGINE & CANVAS RENDERER ---
+    function initVideoEvents() {
+      const input = document.getElementById('video-input');
+      const video = state.video;
+      const playBtn = document.getElementById('play-btn');
+
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          video.src = url;
+          document.getElementById('upload-placeholder').classList.add('hidden');
+          video.classList.remove('hidden');
+          video.play();
+          requestAnimationFrame(renderLoop);
+        }
+      });
+
+      playBtn.addEventListener('click', () => {
+        if(video.paused) {
+          video.play();
+          playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+          video.pause();
+          playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+      });
+    }
+
+    function toggleAITracking() {
+      state.aiTracking = !state.aiTracking;
+      document.getElementById('ai-status-text').textContent = state.aiTracking ? 'AÇIK' : 'KAPALI';
+    }
+
+    function renderLoop() {
+      const { video, canvas, ctx } = state;
+
+      if (video.readyState >= 2) {
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+
+        // Apply Color FX Filters
+        ctx.filter = `brightness(${state.brightness}%) contrast(${state.contrast}%) saturate(${state.saturate}%) blur(${state.blur}px)`;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.filter = 'none';
+
+        // Comp AI Bounding Box & Target Simulation
+        if (state.aiTracking && !video.paused) {
+          const t = Date.now() * 0.003;
+          const boxW = canvas.width * 0.25;
+          const boxH = canvas.height * 0.45;
+          const posX = (canvas.width / 2 - boxW / 2) + Math.sin(t) * (canvas.width * 0.15);
+          const posY = (canvas.height / 2 - boxH / 2) + Math.cos(t * 0.7) * (canvas.height * 0.05);
+
+          // Draw AI Target Box
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(posX, posY, boxW, boxH);
+
+          // Corner Highlights
+          ctx.fillStyle = '#a855f7';
+          ctx.fillRect(posX - 4, posY - 4, 12, 12);
+          ctx.fillRect(posX + boxW - 8, posY - 4, 12, 12);
+          ctx.fillRect(posX - 4, posY + boxH - 8, 12, 12);
+          ctx.fillRect(posX + boxW - 8, posY + boxH - 8, 12, 12);
+
+          // AI Label
+          ctx.fillStyle = 'rgba(11, 15, 25, 0.85)';
+          ctx.fillRect(posX, posY - 28, 140, 24);
+          ctx.fillStyle = '#06b6d4';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillText('COMP AI: PLAYER #1', posX + 8, posY - 12);
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    // --- 5. SLIDERS LISTENERS ---
+    function initSliders() {
+      const keys = ['brightness', 'contrast', 'saturate', 'blur'];
+      keys.forEach(k => {
+        const el = document.getElementById(`fx-${k}`);
+        const display = document.getElementById(`val-${k}`);
+        el.addEventListener('input', (e) => {
+          state[k] = e.target.value;
+          display.textContent = k === 'blur' ? `${e.target.value}px` : `${e.target.value}%`;
+        });
+      });
+    }
+
+    // --- 6. PRESET MANAGERS (SUPABASE INTEGRATION) ---
+    async function fetchGlobalPresets() {
+      const container = document.getElementById('presets-container');
+      container.innerHTML = '';
+      let list = [...localPresets];
+
+      if(sb) {
+        try {
+          const { data, error } = await sb.from('presets').select('*').order('created_at', { ascending: false });
+          if(!error && data && data.length > 0) {
+            list = [...data, ...localPresets];
+          }
+        } catch(e) {
+          console.log("Supabase verisi alınamadı, yerel hazır ayarlar kullanılıyor.");
+        }
+      }
+
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'bg-gray-900/90 border border-gray-800 hover:border-purple-500/50 p-3 rounded-xl flex items-center justify-between cursor-pointer transition';
+        card.innerHTML = `
+          <div>
+            <h4 class="text-sm font-bold text-gray-200">${p.title}</h4>
+            <p class="text-[10px] text-gray-400">B:${p.brightness}% | C:${p.contrast}% | S:${p.saturate}%</p>
+          </div>
+          <button class="bg-purple-900/40 text-purple-300 hover:bg-purple-600 hover:text-white px-3 py-1 rounded-md text-xs font-semibold transition">Uygula</button>
+        `;
+        card.addEventListener('click', () => applyPreset(p));
+        container.appendChild(card);
+      });
+    }
+
+    function applyPreset(p) {
+      state.brightness = p.brightness;
+      state.contrast = p.contrast;
+      state.saturate = p.saturate;
+      state.blur = p.blur || 0;
+
+      document.getElementById('fx-brightness').value = p.brightness;
+      document.getElementById('fx-contrast').value = p.contrast;
+      document.getElementById('fx-saturate').value = p.saturate;
+      document.getElementById('fx-blur').value = p.blur || 0;
+
+      document.getElementById('val-brightness').textContent = p.brightness + '%';
+      document.getElementById('val-contrast').textContent = p.contrast + '%';
+      document.getElementById('val-saturate').textContent = p.saturate + '%';
+      document.getElementById('val-blur').textContent = (p.blur || 0) + 'px';
+    }
+
+    async function savePresetToSupabase() {
+      const titleInput = document.getElementById('preset-title');
+      const title = titleInput.value.trim();
+      if(!title) {
+        alert("Lütfen presete bir başlık yazın!");
+        return;
+      }
+
+      const newPreset = {
+        title: title,
+        brightness: parseInt(state.brightness),
+        contrast: parseInt(state.contrast),
+        saturate: parseInt(state.saturate),
+        blur: parseInt(state.blur)
+      };
+
+      if(sb) {
+        const { error } = await sb.from('presets').insert([newPreset]);
+        if(error) {
+          alert("Supabase Kayıt Hatası: " + error.message);
+        } else {
+          alert("Preset başarıyla veritabanına kaydedildi ve herkese açıklandı!");
+          titleInput.value = '';
+          fetchGlobalPresets();
+        }
+      } else {
+        localPresets.unshift(newPreset);
+        titleInput.value = '';
+        fetchGlobalPresets();
+        alert("Preset yerel olarak eklendi!");
+      }
+    }
+
+    // --- 7. EXPORT & DOWNLOAD VIDEO (MEDIARECORDER FIX) ---
+    async function downloadFxVideo() {
+      const video = state.video;
+      const canvas = state.canvas;
+
+      if (!video.src || video.readyState < 2) {
+        alert("Lütfen önce geçerli bir video yükleyin!");
+        return;
+      }
+
+      const renderModal = document.getElementById('render-modal');
+      const progressBar = document.getElementById('render-bar');
+      const progressText = document.getElementById('render-progress-text');
+
+      renderModal.classList.remove('hidden');
+
+      const stream = canvas.captureStream(30);
+      let mimeType = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+
+      recorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ruler_comp_ai_video.webm';
+        a.click();
+        renderModal.classList.add('hidden');
+      };
+
+      video.currentTime = 0;
+      await video.play();
+      recorder.start(100);
+
+      const duration = video.duration || 1;
+      const trackProgress = () => {
+        if (video.paused || video.ended) {
+          if (recorder.state === 'recording') recorder.stop();
+          return;
+        }
+        const progress = Math.min(100, Math.round((video.currentTime / duration) * 100));
+        progressBar.style.width = progress + '%';
+        progressText.textContent = progress + '%';
+        requestAnimationFrame(trackProgress);
+      };
+      trackProgress();
+    }
+  </script>
+</body>
+</html>
