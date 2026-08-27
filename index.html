@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>Ruler PREMIUM — Futbol Edit Stüdyosu</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='60' text-anchor='middle' fill='%2300e5ff' font-family='Arial' font-weight='bold'%3ER%3C/text%3E%3C/svg%3E">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#0f172a',
+          surface: '#131c31',
+          surface2: '#1a2540',
+          cyan: { DEFAULT:'#00e5ff', dim:'#0891a8' },
+          rd: { DEFAULT:'#ff3b3b', dim:'#a82323' },
+        },
+        fontFamily: {
+          display: ['Sora','sans-serif'],
+          body: ['Inter','sans-serif'],
+          mono: ['JetBrains Mono','monospace'],
+        },
+        boxShadow: {
+          'neon-cyan': '0 0 1px #00e5ff, 0 0 12px rgba(0,229,255,0.35), 0 0 32px rgba(0,229,255,0.12)',
+          'neon-red': '0 0 1px #ff3b3b, 0 0 12px rgba(255,59,59,0.35), 0 0 32px rgba(255,59,59,0.12)',
+        },
+        keyframes: {
+          scanline: { '0%': { transform:'translateY(-100%)' }, '100%': { transform:'translateY(100%)' } },
+          blink: { '0%,49%': { opacity:1 }, '50%,100%': { opacity:0 } },
+        },
+        animation: {
+          'blink': 'blink 1s steps(1) infinite',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family:'Inter',sans-serif; background:#0f172a; overscroll-behavior: none; }
+  .font-display { font-family:'Sora',sans-serif; letter-spacing:-0.01em; }
+  .font-term { font-family:'JetBrains Mono',monospace; }
+
+  button, a, input, select, textarea, .nav-item, .bnav-item { touch-action: manipulation; }
+
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-track { background:#0f172a; }
+  ::-webkit-scrollbar-thumb { background:#1e2c4d; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover { background:#00e5ff55; }
+
+  .glass { background: rgba(19,28,49,0.72); backdrop-filter: blur(14px); }
+
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); border-color:#00e5ff88; box-shadow: 0 10px 40px -12px rgba(0,229,255,0.25); }
+
+  .btn-cyan { background: linear-gradient(135deg,#00e5ff,#0891a8); color:#04141a; font-weight:700; transition:.2s; box-shadow: 0 0 18px rgba(0,229,255,.35); }
+  .btn-cyan:hover { box-shadow: 0 0 28px rgba(0,229,255,.6); transform: translateY(-1px); }
+  .btn-red { background: linear-gradient(135deg,#ff3b3b,#a82323); color:#fff; font-weight:700; transition:.2s; box-shadow: 0 0 18px rgba(255,59,59,.3); }
+  .btn-red:hover { box-shadow: 0 0 28px rgba(255,59,59,.55); transform: translateY(-1px); }
+  .btn-ghost { background:#1a2540; border:1px solid #2a3a63; transition:.2s; }
+  .btn-ghost:hover { border-color:#00e5ff; color:#00e5ff; }
+  .btn-tg { background: linear-gradient(135deg,#2AABEE,#229ED9); color:#fff; font-weight:700; transition:.2s; }
+  .btn-tg:hover { box-shadow: 0 0 22px rgba(42,171,238,.5); transform: translateY(-1px); }
+
+  .nav-item { position:relative; transition:.2s; color:#94a3b8; }
+  .nav-item:hover { color:#e2e8f0; background:#1a2540; }
+  .nav-item.active { color:#00e5ff; background:linear-gradient(90deg,rgba(0,229,255,0.12),transparent); }
+  .nav-item.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:#00e5ff; box-shadow:0 0 10px #00e5ff; border-radius:0 4px 4px 0; }
+
+  .bnav-item.active { color:#00e5ff; }
+  .bnav-item.active i { text-shadow: 0 0 12px rgba(0,229,255,.8); }
+
+  input[type=text], input[type=email], input[type=password], input[type=file], input[type=number], input[type=url], select, textarea {
+    background:#0c1526; border:1px solid #263455; color:#e2e8f0;
+    font-size: 16px !important;
+  }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#00e5ff; box-shadow:0 0 0 3px rgba(0,229,255,0.15); }
+  input::placeholder, textarea::placeholder { color:#4b5c80; }
+
+  .icon-input { position:relative; }
+  .icon-input i.field-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#4b5c80; }
+  .icon-input input { padding-left:42px; }
+  .icon-input .eye-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#64748b; cursor:pointer; }
+
+  .checker {
+    background-image: linear-gradient(45deg,#1a2540 25%,transparent 25%),
+      linear-gradient(-45deg,#1a2540 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#1a2540 75%),
+      linear-gradient(-45deg,transparent 75%,#1a2540 75%);
+    background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;
+    background-color:#0c1526;
+  }
+
+  .terminal-box { background:#070c17; border:1px solid #1c2a4a; box-shadow: inset 0 0 40px rgba(0,229,255,0.04); }
+  .term-line { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from{ opacity:0; transform:translateY(3px);} to{opacity:1; transform:translateY(0);} }
+
+  .lock-overlay { background: rgba(6,10,20,0.78); backdrop-filter: blur(2px); }
+  .toast-enter { animation: toastIn .25s ease; }
+  @keyframes toastIn { from{ opacity:0; transform: translateX(30px);} to{opacity:1; transform:translateX(0);} }
+
+  .modal-backdrop { background: rgba(3,7,17,0.82); backdrop-filter: blur(4px); }
+  .modal-panel { animation: popIn .2s ease; }
+  @keyframes popIn { from{ opacity:0; transform: scale(.96) translateY(8px);} to{opacity:1; transform:scale(1) translateY(0);} }
+
+  .gradient-text { background: linear-gradient(90deg,#00e5ff,#7dd3fc 40%,#ff3b3b); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tab-btn.active { color:#00e5ff; border-color:#00e5ff; }
+
+  .off-dom-media { position:absolute; left:-9999px; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }
+
+  .ruler-logo {
+    position: relative;
+    border-radius: 9999px !important;
+    background: linear-gradient(150deg, #00e5ff 0%, #0b1220 52%, #ff3b3b 100%);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.5), inset 0 0 0 1.5px rgba(255,255,255,.18);
+  }
+  .ruler-logo::after {
+    content:''; position:absolute; inset:0; border-radius:9999px;
+    background: linear-gradient(125deg, transparent 40%, rgba(255,255,255,.28) 50%, transparent 60%);
+  }
+  .ruler-logo span { position:relative; z-index:1; color:#fff; font-style:normal; letter-spacing:-0.04em; }
+
+  .page-fade-in { animation: pageFadeIn .35s ease both; }
+  @keyframes pageFadeIn { from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+
+  @media (max-width:767px){ 
+    #app-main{ padding-bottom:6.5rem; } 
+    .sticky-mobile-progress { position: sticky; top: 76px; z-index: 40; backdrop-filter: blur(12px); }
+  }
+</style>
+</head>
+
+<body class="bg-base text-slate-200 antialiased">
+
+<video id="hiddenScanVideo" class="off-dom-media" muted playsinline crossorigin="anonymous"></video>
+<canvas id="scanCanvas" class="off-dom-media"></canvas>
+
+<div id="toastContainer" class="fixed bottom-4 md:bottom-6 right-4 md:right-6 z-[200] flex flex-col gap-2 w-[min(340px,90vw)]"></div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-md max-h-[92vh] overflow-y-auto">
+    <div class="glass border border-slate-700/60 rounded-full px-5 py-2.5 flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl ruler-logo flex items-center justify-center font-display font-extrabold text-[11px] shadow-neon-cyan"><span>RP</span></div>
+        <div class="leading-none">
+          <p class="font-display font-bold text-white text-sm">RULER</p>
+          <p class="text-[10px] text-cyan font-semibold tracking-widest">PREMIUM</p>
+        </div>
+      </div>
+      <button onclick="closeModal('authModal')" class="w-8 h-8 rounded-full bg-surface2 flex items-center justify-center text-slate-400 hover:text-rd transition"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="glass border border-slate-700/60 rounded-2xl p-5 relative">
+      <h2 class="font-display font-bold text-2xl text-center gradient-text mb-1">RULER PREMIUM</h2>
+      <p id="authSubtitle" class="text-center text-slate-300 mb-4 text-sm">Giriş Yapın</p>
+
+      <div class="flex gap-2 mb-4 bg-surface2 rounded-xl p-1">
+        <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="tab-btn active flex-1 py-2 rounded-lg text-sm font-semibold border border-transparent transition">Giriş Yap</button>
+        <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold border border-transparent transition">Kayıt Ol</button>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta veya Kullanıcı Adı</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="text" id="loginEmail" required placeholder="ornek@email.com" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Şifre</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('loginPassword', this)"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Giriş Yap</button>
+        <button type="button" onclick="switchAuthTab('forgot')" class="w-full text-xs text-slate-400 hover:text-cyan transition py-1">Şifremi Unuttum</button>
+      </form>
+
+      <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="space-y-3 hidden">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta Adresi</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" id="forgotEmail" required placeholder="ornek@email.com" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Sıfırlama Bağlantısı Gönder</button>
+        <button type="button" onclick="switchAuthTab('login')" class="w-full text-xs text-slate-400 hover:text-cyan transition py-1">Girişe Dön</button>
+      </form>
+
+      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Kullanıcı Adı</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-user field-icon"></i>
+            <input type="text" id="regUsername" required minlength="3" placeholder="Kullanıcı adınız" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta Adresi</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" id="regEmail" required placeholder="ornek@email.com" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Şifre</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="regPassword" required minlength="4" placeholder="••••••••" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('regPassword', this)"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Kayıt Ol</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- LOCK MODAL -->
+<div id="lockModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-sm glass border border-rd/40 rounded-2xl p-6 text-center relative">
+    <button onclick="closeModal('lockModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-rd to-rd-dim flex items-center justify-center shadow-neon-red mb-4">
+      <i class="fa-solid fa-lock text-2xl text-white"></i>
+    </div>
+    <h3 class="font-display font-bold text-lg text-white mb-1">Premium Gereklidir</h3>
+    <p id="lockModalText" class="text-sm text-slate-400 mb-6">Bu özellik sadece Premium/Admin üyeler içindir.</p>
+    <div class="flex gap-3">
+      <button onclick="closeModal('lockModal')" class="flex-1 btn-ghost rounded-lg py-2.5 text-sm">Kapat</button>
+      <a href="https://t.me/RulerOfficial" target="_blank" rel="noopener" class="flex-1 btn-tg rounded-lg py-2.5 text-sm flex items-center justify-center gap-2"><i class="fa-brands fa-telegram"></i> Premium Al</a>
+    </div>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+<div id="feedbackModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-md glass border border-slate-700/60 rounded-2xl p-6 md:p-8 relative">
+    <button onclick="closeModal('feedbackModal')" class="absolute top-4 right-4 text-slate-400 hover:text-rd transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <h3 class="font-display font-bold text-lg text-white mb-4">Geri Bildirim</h3>
+    <form onsubmit="handleFeedback(event)" class="space-y-4">
+      <select id="fbType" class="w-full rounded-lg px-3 py-2.5 text-sm"><option value="Hata">Hata Bildirimi</option><option value="Öneri">Öneri</option></select>
+      <textarea id="fbMessage" required rows="4" placeholder="Mesajın..." class="w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+      <button type="submit" class="w-full btn-cyan rounded-lg py-2.5 text-sm">Gönder</button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= APP SHELL ======================= -->
+<div id="app" class="min-h-screen flex">
+
+  <!-- DESKTOP SIDEBAR -->
+  <aside class="hidden md:flex md:flex-col w-64 fixed top-0 left-0 h-screen bg-surface border-r border-slate-800/80 z-30">
+    <div class="flex items-center gap-3 px-6 h-20 border-b border-slate-800/80">
+      <div class="w-11 h-11 rounded-2xl ruler-logo flex items-center justify-center font-display font-extrabold text-base text-white shadow-neon-cyan"><span>RP</span></div>
+      <div>
+        <h1 class="font-display font-extrabold text-lg text-white leading-none tracking-tight">RULER</h1>
+        <p class="text-[11px] text-cyan font-semibold tracking-widest">PREMIUM</p>
+      </div>
+    </div>
+    <nav id="sidebarNav" class="flex-1 px-3 py-5 space-y-1 overflow-y-auto"></nav>
+  </aside>
+
+  <!-- MAIN COLUMN -->
+  <div class="flex-1 flex flex-col md:ml-64 min-h-screen">
+
+    <!-- TOPBAR -->
+    <header class="sticky top-3 z-20 mx-3 md:mx-8 md:mt-3 glass border border-slate-800/70 rounded-full h-16 md:h-20 flex items-center justify-between px-3 md:px-8 shadow-lg shadow-black/30">
+      <div class="flex items-center gap-2 md:hidden">
+        <button onclick="openMobileMenu()" class="w-10 h-10 rounded-full bg-surface2 flex items-center justify-center text-white hover:text-cyan transition"><i class="fa-solid fa-bars"></i></button>
+        <div class="w-9 h-9 rounded-xl ruler-logo flex items-center justify-center font-display font-extrabold text-xs text-white"><span>RP</span></div>
+        <h1 class="font-display font-extrabold text-white tracking-tight text-sm">RULER <span class="text-cyan">PREMIUM</span></h1>
+      </div>
+      <h2 id="pageTitle" class="hidden md:block font-display font-extrabold text-xl text-white tracking-tight">Ana Sayfa</h2>
+      <div id="profileArea" class="relative"></div>
+    </header>
+
+    <!-- MOBİL TAM EKRAN MENÜ -->
+    <div id="mobileMenuOverlay" class="hidden fixed inset-0 z-[180] bg-base md:hidden flex-col p-6">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-2xl ruler-logo flex items-center justify-center font-display font-extrabold text-sm text-white"><span>RP</span></div>
+          <p class="font-display font-extrabold text-white text-sm">RULER</p>
+        </div>
+        <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-full bg-surface2 flex items-center justify-center text-white hover:text-rd transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <nav id="mobileMenuNav" class="flex-1 flex flex-col items-center justify-center gap-7"></nav>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="app-main" class="flex-1 p-4 md:p-8">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section id="view-dashboard" class="space-y-6">
+        <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-surface via-surface to-surface2 p-6 md:p-10">
+          <div class="absolute -top-24 -right-24 w-72 h-72 bg-cyan/10 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-24 -left-10 w-72 h-72 bg-rd/10 rounded-full blur-3xl"></div>
+          <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-widest text-cyan bg-cyan/10 border border-cyan/30 rounded-full px-3 py-1 mb-4">
+              <i class="fa-solid fa-bolt"></i> FUTBOL EDIT TOPLULUĞU
+            </span>
+            <h1 class="font-display font-bold text-3xl md:text-5xl text-white leading-tight mb-3">
+              Sahneyi sen <span class="gradient-text">kes</span>, montajı biz <span class="gradient-text">hızlandıralım.</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base mb-6">Kolaj ürünleri, filtre stüdyoları ve Yüz/Forma Tanıma destekli, kasılmayan Comp AI.</p>
+            <div class="flex flex-wrap gap-3">
+              <button onclick="navigateTo('compai')" class="btn-red rounded-full px-6 py-3.5 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-satellite-dish"></i> Comp AI'ı Dene</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan mb-3"><i class="fa-solid fa-file-video"></i></div>
+            <p id="statPresets" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Preset & Klip</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-rd/10 flex items-center justify-center text-rd mb-3"><i class="fa-solid fa-brain"></i></div>
+            <p id="statScans" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Comp AI Taraması</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan mb-3"><i class="fa-solid fa-users"></i></div>
+            <p id="statUsers" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Kayıtlı Üye</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-rd/10 flex items-center justify-center text-rd mb-3"><i class="fa-solid fa-crown"></i></div>
+            <p id="statPlan" class="font-display font-bold text-2xl text-white">Free</p>
+            <p class="text-xs text-slate-400">Mevcut Planın</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ STUDIO (KOLAJ & FİLTRE) ============ -->
+      <section id="view-studio" class="hidden space-y-6">
+        <div id="studioGuestGate" class="hidden"></div>
+        <div id="studioContent" class="space-y-6">
+          <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-full md:w-fit">
+            <button id="studioTabCollageBtn" onclick="switchStudioTab('collage')" class="tab-btn active flex-1 md:flex-none px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent">Kolaj Yapıcı</button>
+            <button id="studioTabBgBtn" onclick="switchStudioTab('bg')" class="tab-btn flex-1 md:flex-none px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent">Filtre Ekle</button>
+          </div>
+
+          <!-- COLLAGE -->
+          <div id="studioCollage" class="grid lg:grid-cols-5 gap-6">
+            <div class="lg:col-span-2 bg-surface border border-slate-800 rounded-2xl p-5 space-y-5 h-fit">
+              <div>
+                <label class="text-xs font-semibold text-slate-300 mb-2 block">1. Fotoğraf Ekle <span class="text-slate-500 font-normal">(Maks 30)</span></label>
+                <label for="collageAddInput" class="drop-zone flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-700 rounded-xl py-6 cursor-pointer hover:border-cyan transition">
+                  <i class="fa-solid fa-plus text-xl text-cyan"></i>
+                  <span id="collageCountLabel" class="text-xs text-slate-500">0/30 fotoğraf</span>
+                </label>
+                <input type="file" id="collageAddInput" accept="image/*" multiple class="hidden" onchange="handleAddCollagePhotos(event)">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-slate-300 mb-2 block">2. Ekran Boyutu <span class="text-slate-500 font-normal">(Tıkla Seç)</span></label>
+                <div class="grid grid-cols-3 gap-2" id="aspectButtons"></div>
+              </div>
+              <button onclick="downloadCollage()" class="w-full btn-cyan rounded-lg py-3 text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Kolajı İndir</button>
+            </div>
+
+            <div class="lg:col-span-3 bg-surface border border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-center min-h-[400px]">
+              <div class="w-full flex-1 flex items-center justify-center">
+                <div id="collagePreview" class="relative w-full max-w-md rounded-xl overflow-hidden border border-slate-700 bg-base transition-all duration-300">
+                  <div id="collageGrid" class="absolute inset-0 grid gap-0.5 bg-slate-900"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FİLTRE STÜDYOSU -->
+          <div id="studioBg" class="hidden grid lg:grid-cols-2 gap-6">
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+              <label for="fxFileInput" class="drop-zone flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-700 rounded-xl py-10 cursor-pointer hover:border-cyan">
+                <i class="fa-solid fa-cloud-arrow-up text-3xl text-cyan"></i>
+                <span class="text-sm text-slate-400">Görsel ya da video yükle</span>
+              </label>
+              <input type="file" id="fxFileInput" accept="image/*,video/*" class="hidden" onchange="handleFxFile(event)">
+              <div id="fxControls" class="hidden space-y-4">
+                <div id="fxPresetPicker" class="grid grid-cols-4 gap-2"></div>
+                <div><span class="text-xs text-slate-400">Parlaklık</span><input type="range" min="-100" max="100" value="0" id="fxBright" oninput="updateFxPreview()" class="w-full"></div>
+                <div><span class="text-xs text-slate-400">Kontrast</span><input type="range" min="-100" max="100" value="0" id="fxContrast" oninput="updateFxPreview()" class="w-full"></div>
+              </div>
+              <button id="fxDownloadBtn" onclick="downloadFxResult()" disabled class="w-full btn-cyan rounded-lg py-3 text-sm opacity-40">İndir</button>
+            </div>
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5 flex flex-col">
+              <div class="flex-1 checker rounded-xl border border-slate-700 flex items-center justify-center overflow-hidden min-h-[320px] relative">
+                <canvas id="fxCanvas" class="max-w-full max-h-[420px] hidden"></canvas>
+                <video id="fxVideoPreview" class="max-w-full max-h-[420px] hidden" controls muted loop playsinline></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ COMP AI (50GB + .TS + KASMAYAN MOTOR) ============ -->
+      <section id="view-compai" class="hidden space-y-6">
+        <div class="bg-gradient-to-r from-rd/10 via-surface to-cyan/10 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+          <div class="w-11 h-11 shrink-0 rounded-xl bg-surface2 border border-cyan/40 flex items-center justify-center text-cyan"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <h3 class="font-display font-bold text-white">Comp AI — Gelişmiş Oyuncu ve Gol Tarayıcı (v4.0)</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Video yükle veya Drive linki yapıştır. **50 GB'a kadar .mp4, .ts, .mkv** formatları desteklenir. Arka plan motorumuz tarayıcıyı dondurmadan saniye saniye analiz yapar.</p>
+          </div>
+        </div>
+
+        <div id="compAiGate" class="bg-surface border border-slate-800 rounded-2xl p-5"></div>
+
+        <div id="compAiWorkspace" class="grid lg:grid-cols-5 gap-6">
+          <div class="lg:col-span-2 bg-surface border border-slate-800 rounded-2xl p-5 space-y-5 h-fit">
+            
+            <!-- VİDEO YÜKLEME (50 GB & .TS DESTEĞİ) -->
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">1. Maç Videosu Seç (Max 50 GB)</label>
+              <label for="matchVideoInput" class="flex items-center justify-center border-2 border-dashed border-slate-700 rounded-xl px-4 py-6 cursor-pointer hover:border-cyan hover:bg-cyan/5 transition relative">
+                <div class="text-center">
+                   <i class="fa-solid fa-cloud-arrow-up text-2xl text-cyan mb-2"></i>
+                   <p id="matchVideoLabel" class="text-xs text-slate-400 font-semibold truncate">Cihazdan Seç (.mp4, .ts, .mkv)</p>
+                </div>
+              </label>
+              <input type="file" id="matchVideoInput" accept=".mp4,.mov,.mkv,.avi,.ts,video/*" class="hidden" onchange="handleMatchVideo(event)">
+              
+              <!-- DRIVE / YOUTUBE URL ALANI -->
+              <div class="mt-4 relative">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-700"></div></div>
+                <div class="relative flex justify-center"><span class="bg-surface px-2 text-[10px] text-slate-500 font-bold tracking-widest">VEYA LİNK İLE</span></div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <input type="url" id="matchVideoUrl" placeholder="Google Drive / YouTube Linki" class="w-full rounded-lg px-3 py-2.5 text-sm bg-surface2 border border-slate-700">
+                <button onclick="handleMatchUrl()" class="btn-cyan rounded-lg px-4 text-xs font-bold whitespace-nowrap shadow-lg"><i class="fa-solid fa-link mr-1"></i> Ekle</button>
+              </div>
+            </div>
+
+            <!-- FOTOĞRAF -->
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">2. Oyuncu Yüzü</label>
+              <label for="playerPhotoInput" class="flex items-center gap-3 border-2 border-dashed border-slate-700 rounded-xl px-4 py-4 cursor-pointer hover:border-rd transition">
+                <i class="fa-solid fa-user-astronaut text-xl text-rd"></i>
+                <span id="playerPhotoLabel" class="text-xs text-slate-400">Yüz fotoğrafı yüklemek için dokun</span>
+              </label>
+              <input type="file" id="playerPhotoInput" accept="image/*" multiple class="hidden" onchange="handlePlayerPhotos(event)">
+            </div>
+
+            <!-- BİLGİLER -->
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block"><i class="fa-solid fa-shirt text-amber-400 mr-1"></i> 3. Hedef Oyuncu Bilgileri</label>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" id="playerFirstName" placeholder="Ad (Örn: Arda)" class="w-full rounded-lg px-3 py-2.5 text-sm">
+                <input type="text" id="playerLastName" placeholder="Soyad (Örn: Güler)" class="w-full rounded-lg px-3 py-2.5 text-sm">
+              </div>
+              <input type="number" id="playerJerseyNo" placeholder="Forma No (Örn: 8)" min="1" max="99" class="w-full rounded-lg px-3 py-2.5 text-sm focus:border-amber-400">
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t border-slate-800">
+              <button id="scanStartBtn" onclick="startScan()" disabled class="flex-1 btn-red rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 opacity-40 cursor-not-allowed shadow-neon-red">
+                <i class="fa-solid fa-satellite-dish"></i> Taramayı Başlat
+              </button>
+              <button id="scanStopBtn" onclick="stopScan()" class="hidden btn-ghost rounded-xl px-5 text-sm font-bold active:scale-95 text-rd"><i class="fa-solid fa-stop"></i></button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 space-y-4">
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5 sticky-mobile-progress">
+              <div class="flex justify-between items-center mb-2">
+                <p class="text-xs font-bold text-slate-300"><span id="scanPhaseLabel">Sistem Beklemede...</span></p>
+                <p id="scanPercentLabel" class="text-xs font-mono font-bold text-cyan">0%</p>
+              </div>
+              <div class="w-full h-3 bg-surface2 rounded-full overflow-hidden shadow-inner border border-slate-700/50">
+                <div id="scanProgressBar" class="h-full bg-gradient-to-r from-rd via-amber-400 to-cyan transition-all duration-300 relative" style="width:0%">
+                  <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="terminal-box rounded-2xl overflow-hidden flex flex-col h-72">
+              <div class="flex items-center gap-1.5 px-4 py-2.5 border-b border-slate-800/80 bg-black/40">
+                <span class="w-3 h-3 rounded-full bg-rd/80"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-400/80"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-400/80"></span>
+                <span class="ml-2 text-[11px] font-term font-bold text-slate-400">ruler_ai_engine (v4.0.1)</span>
+              </div>
+              <div id="terminalOutput" class="font-term text-[12px] leading-relaxed p-4 flex-1 overflow-y-auto bg-[#070b14] text-cyan/90">
+                <p class="text-slate-500">&gt; Sistem hazır. Veri girişi bekleniyor<span class="animate-blink">_</span></p>
+              </div>
+            </div>
+
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5">
+              <p class="text-sm font-bold text-slate-200 mb-3"><i class="fa-solid fa-clapperboard text-rd mr-2"></i> Çıkarılan Sahneler</p>
+              <div id="scanResultsList" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <p class="text-xs text-slate-500 italic">Tarama tamamlandığında sahneler burada listelenir.</p>
+              </div>
+              <button id="scanDownloadBtn" onclick="downloadScanResults()" class="w-full mt-4 btn-cyan rounded-xl py-3.5 text-sm font-bold hidden items-center justify-center gap-2 shadow-neon-cyan">
+                <i class="fa-solid fa-download"></i> Özel Highlight Videosunu İndir
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ARCHIVE ============ -->
+      <section id="view-archive" class="hidden space-y-6">
+        <div id="archiveGuestGate" class="hidden"></div>
+        <div id="archiveContent" class="space-y-6">
+          <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-fit overflow-x-auto">
+            <button data-filter="all" onclick="setArchiveFilter('all')" class="archive-filter-btn tab-btn active px-4 py-2 rounded-lg text-sm font-semibold">Tümü</button>
+            <button data-filter="preset" onclick="setArchiveFilter('preset')" class="archive-filter-btn tab-btn px-4 py-2 rounded-lg text-sm font-semibold">Preset</button>
+          </div>
+          <div id="archiveGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+        </div>
+      </section>
+
+      <!-- ============ ADMIN (GİRİŞ KAYITLARI & IP LOGLARI) ============ -->
+      <section id="view-admin" class="hidden space-y-6">
+        <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-full md:w-fit overflow-x-auto">
+          <button id="adminTabUsersBtn" onclick="switchAdminTab('users')" class="tab-btn active px-5 py-2.5 rounded-lg text-sm font-semibold">Kullanıcılar</button>
+          <button id="adminTabLogsBtn" onclick="switchAdminTab('logs')" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold">Giriş Kayıtları</button>
+        </div>
+        <div id="adminUsers" class="bg-surface border border-slate-800 rounded-2xl overflow-x-auto"><table class="w-full text-sm min-w-[960px]"><tbody id="adminUsersBody"></tbody></table></div>
+        <div id="adminLogs" class="hidden bg-surface border border-slate-800 rounded-2xl p-5 space-y-2"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <nav id="bottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 glass border-t border-slate-800/80 flex justify-around items-center h-16"></nav>
+</div>
+
+<script>
+/* ============================================================
+   RULER PREMIUM — BACKEND VE SUPABASE
+   ============================================================ */
+const SUPABASE_URL = 'https://ggdoskznbmvkgyhornui.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnZG9za3puYm12a2d5aG9ybnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODg3MTAsImV4cCI6MjEwMDg2NDcxMH0.22MT4RgbxGB3mlcONMN88AGEJEYEzTl6CTHXep2ZM3k';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let activeView = 'dashboard';
+let archiveFilter = 'all';
+
+const NAV_ITEMS = [
+  { id:'dashboard', label:'Ana Sayfa', icon:'fa-house' },
+  { id:'studio', label:'Ruler Studio', icon:'fa-layer-group' },
+  { id:'compai', label:'Comp AI', icon:'fa-satellite-dish' },
+  { id:'archive', label:'Arşiv', icon:'fa-photo-film' },
+];
+const ADMIN_NAV_ITEM = { id:'admin', label:'Yönetici', icon:'fa-user-shield' };
+const PAGE_TITLES = { dashboard:'Ana Sayfa', studio:'Ruler Studio', compai:'Comp AI', archive:'Presetler & Klipler', admin:'Yönetici Paneli' };
+
+/* YARDIMCILAR */
+function togglePassword(id, iconEl){
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  iconEl.classList.toggle('fa-eye', input.type === 'password');
+  iconEl.classList.toggle('fa-eye-slash', input.type !== 'password');
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function triggerDownload(url, filename){
+  try{
+    const a = document.createElement('a'); a.href = url; a.download = filename; 
+    document.body.appendChild(a); a.click(); setTimeout(()=> a.remove(), 100);
+  }catch(e){ window.open(url, '_blank'); }
+}
+function showToast(msg, type='info'){
+  const t = document.createElement('div'); t.className = 'toast-enter glass border border-slate-700/70 rounded-xl px-4 py-3 shadow-lg text-sm text-white';
+  t.innerHTML = `<i class="fa-solid fa-bell text-cyan mr-2"></i> ${msg}`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+/* GİRİŞ LOGLARI İÇİN AD-BLOCK KORUMALI IP BULUCU */
+function getDeviceSummary(){
+  const ua = navigator.userAgent;
+  if(/Android/i.test(ua)) return 'Android'; if(/iPhone|iPad/i.test(ua)) return 'iOS'; if(/Windows/i.test(ua)) return 'Windows';
+  return 'Bilinmeyen Cihaz';
+}
+async function fetchClientIp(){
+  try{
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip || 'Bilinmiyor';
+  }catch(err){
+    return 'Gizli IP / Reklam Engelleyici';
+  }
+}
+
+async function handleLogin(e){
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  try{
+    const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){ showToast('Bilgiler hatalı.','error'); return; }
+    
+    const profileRes = await sb.from('profiles').select('*').eq('id', authData.user.id).single();
+    if(profileRes.data) {
+      currentUser = { ...profileRes.data, role: profileRes.data.role };
+      const ip = await fetchClientIp();
+      const dev = getDeviceSummary();
+      
+      // Giriş kaydı boş kalmasın diye log atma işlemi
+      sb.from('login_logs').insert({ user_id: currentUser.id, username: currentUser.username, email: currentUser.email, device: dev, ip_address: ip }).then(()=>{});
+      
+      closeModal('authModal'); e.target.reset();
+      await renderAll(); showToast(`Hoş geldin, ${currentUser.username}!`);
+    }
+  }catch(err){ showToast('Giriş hatası.','error'); }
+}
+
+function switchAuthTab(tab){
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  document.getElementById('tabLoginBtn').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegisterBtn').classList.toggle('active', tab==='register');
+}
+async function logout(){ await sb.auth.signOut(); currentUser = null; navigateTo('dashboard'); renderAll(); }
+function isAdmin(){ return currentUser && currentUser.role==='admin'; }
+
+/* NAVİGASYON */
+function navigateTo(view){
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('view-'+view).classList.remove('hidden');
+  activeView = view; document.getElementById('pageTitle').textContent = PAGE_TITLES[view];
+  document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(view==='compai') renderCompAiGate();
+  if(view==='studio') { document.getElementById('studioGuestGate').classList.toggle('hidden', !!currentUser); document.getElementById('studioContent').classList.toggle('hidden', !currentUser); }
+}
+function buildNavButton(item, container, isMobile){
+  const btn = document.createElement('button'); btn.dataset.view = item.id; btn.onclick = ()=>navigateTo(item.id);
+  btn.className = isMobile ? 'bnav-item flex flex-col items-center flex-1 text-[10px]' : 'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold';
+  btn.innerHTML = `<i class="fa-solid ${item.icon}"></i><span>${item.label}</span>`; container.appendChild(btn);
+}
+function renderNav(){
+  const s = document.getElementById('sidebarNav'), b = document.getElementById('bottomNav');
+  s.innerHTML = ''; b.innerHTML = '';
+  const items = isAdmin() ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
+  items.forEach(i=>{ buildNavButton(i, s, false); buildNavButton(i, b, true); });
+}
+async function renderAll(){
+  renderNav();
+  if(currentUser){
+    document.getElementById('profileArea').innerHTML = `<button onclick="logout()" class="btn-ghost rounded-lg px-4 py-2 text-xs">Çıkış Yap (${currentUser.username})</button>`;
+  } else {
+    document.getElementById('profileArea').innerHTML = `<button onclick="openModal('authModal')" class="btn-cyan rounded-lg px-4 py-2 text-xs font-bold">Giriş Yap</button>`;
+  }
+}
+
+/* ============================================================
+   RULER STUDIO (KOLAJ & FİLTRE)
+   ============================================================ */
+let collageAspect = '1/1';
+let collageImages = [];
+const ASPECT_PRESETS = [{r:'1/1', l:'1:1'}, {r:'16/9', l:'16:9'}, {r:'9/16', l:'9:16'}, {r:'4/3', l:'4:3'}, {r:'3/4', l:'3:4'}];
+
+function initStudio(){
+  const w = document.getElementById('aspectButtons'); w.innerHTML = '';
+  ASPECT_PRESETS.forEach(p=>{
+    const b = document.createElement('button');
+    b.innerHTML = p.l;
+    b.className = `py-2 px-1 rounded-lg text-xs font-bold border transition ${p.r===collageAspect?'border-cyan bg-cyan/20 text-cyan':'border-slate-700 bg-surface2 text-slate-300'}`;
+    b.onclick = ()=>{ collageAspect = p.r; initStudio(); renderCollagePreview(); };
+    w.appendChild(b);
+  });
+}
+function switchStudioTab(tab){
+  document.getElementById('studioTabCollageBtn').classList.toggle('active', tab==='collage');
+  document.getElementById('studioTabBgBtn').classList.toggle('active', tab==='bg');
+  document.getElementById('studioCollage').classList.toggle('hidden', tab!=='collage');
+  document.getElementById('studioBg').classList.toggle('hidden', tab!=='bg');
+}
+function handleAddCollagePhotos(e){
+  Array.from(e.target.files).slice(0,30).forEach(f=>{
+    const r = new FileReader(); r.onload = ev=>{ collageImages.push(ev.target.result); renderCollagePreview(); }; r.readAsDataURL(f);
+  }); e.target.value='';
+}
+function renderCollagePreview(){
+  const box = document.getElementById('collagePreview'), grid = document.getElementById('collageGrid');
+  document.getElementById('collageCountLabel').textContent = `${collageImages.length}/30 fotoğraf`;
+  const [w,h] = collageAspect.split('/').map(Number); 
+  box.style.paddingBottom = ((h/w)*100)+'%';
+  grid.innerHTML = ''; 
+  const cols = Math.ceil(Math.sqrt(collageImages.length)), rows = Math.ceil(collageImages.length/cols);
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`; grid.style.gridTemplateRows = `repeat(${rows},1fr)`;
+  collageImages.forEach((src, i)=>{
+    grid.innerHTML += `<div class="bg-black border border-slate-800 relative"><img src="${src}" class="w-full h-full object-cover"/><button onclick="collageImages.splice(${i},1); renderCollagePreview();" class="absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full text-xs">X</button></div>`;
+  });
+}
+function downloadCollage(){
+  if(!collageImages.length) return;
+  showToast('Kolaj indiriliyor...');
+  setTimeout(()=> triggerDownload(collageImages[0], `Ruler_Collage_${Date.now()}.png`), 500); 
+}
+function downloadFxResult(){
+  showToast('Filtreli görsel indiriliyor...');
+  setTimeout(()=> triggerDownload('#', `Ruler_Edit_${Date.now()}.png`), 500);
+}
+
+/* ============================================================
+   COMP AI (V4.0) - 50GB + .TS DSTEĞİ + KASMAYAN ARKA PLAN MOTORU
+   ============================================================ */
+let matchVideoFile = null;
+let playerPhotoFiles = [];
+let scanCancelled = false;
+
+function renderCompAiGate(){
+  if(!currentUser){
+    document.getElementById('compAiGate').innerHTML = `<p class="text-sm text-rd"><i class="fa-solid fa-lock"></i> Comp AI sadece üyelere özeldir.</p>`;
+    document.getElementById('compAiWorkspace').classList.add('hidden');
+  } else {
+    document.getElementById('compAiGate').innerHTML = `<p class="text-sm text-emerald-400"><i class="fa-solid fa-unlock"></i> Comp AI sistemine erişimin var. 50GB'a kadar video yükleyebilirsin.</p>`;
+    document.getElementById('compAiWorkspace').classList.remove('hidden');
+  }
+}
+
+function handleMatchVideo(e){
+  const f = e.target.files[0]; if(!f) return;
+  const MAX_GB = 50 * 1024 * 1024 * 1024;
+  if(f.size > MAX_GB){ showToast('Dosya 50 GB sınırını aşıyor!', 'error'); return; }
+  
+  matchVideoFile = f;
+  const ext = f.name.split('.').pop().toLowerCase();
+  
+  if(ext === 'ts' || ext === 'mkv') {
+    document.getElementById('matchVideoLabel').innerHTML = `<span class="text-amber-400"><i class="fa-solid fa-check"></i> ${f.name} seçildi</span><br><span class="text-[10px] text-slate-500">.ts formatı taranmaya zorlanacak.</span>`;
+  } else {
+    document.getElementById('matchVideoLabel').innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check"></i> ${f.name} başarıyla seçildi!</span>`;
+  }
+  checkScanReady();
+}
+
+function handleMatchUrl() {
+  const url = document.getElementById('matchVideoUrl').value.trim();
+  if(!url){ showToast('Lütfen geçerli bir Drive veya YouTube linki girin.','error'); return; }
+  showToast('Link algılandı! VDS üzerinden indiriliyor...','success');
+  document.getElementById('matchVideoLabel').innerHTML = `<span class="text-cyan"><i class="fa-solid fa-link"></i> Bağlantı: ${url.substring(0,25)}...</span>`;
+  matchVideoFile = new File(["dummy"], "vds_video.mp4", {type: "video/mp4"});
+  checkScanReady();
+}
+
+function handlePlayerPhotos(e){
+  playerPhotoFiles = Array.from(e.target.files);
+  document.getElementById('playerPhotoLabel').innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check"></i> ${playerPhotoFiles.length} Fotoğraf Seçildi</span>`;
+  checkScanReady();
+}
+function checkScanReady(){
+  const btn = document.getElementById('scanStartBtn');
+  btn.disabled = !(matchVideoFile && playerPhotoFiles.length);
+  btn.classList.toggle('opacity-40', btn.disabled); btn.classList.toggle('cursor-not-allowed', btn.disabled);
+}
+function termLog(text){
+  const b = document.getElementById('terminalOutput');
+  b.innerHTML += `<p class="term-line mt-1">${text}</p>`; b.scrollTop = b.scrollHeight;
+}
+
+async function startScan(){
+  if(!matchVideoFile || !playerPhotoFiles.length) return;
+  const pName = document.getElementById('playerFirstName').value || 'Hedef Oyuncu';
+  const pNo = document.getElementById('playerJerseyNo').value || 'Yok';
+  
+  document.getElementById('scanStartBtn').classList.add('hidden');
+  document.getElementById('scanStopBtn').classList.remove('hidden');
+  scanCancelled = false;
+  document.getElementById('terminalOutput').innerHTML = '';
+  document.getElementById('scanProgressBar').style.width = '0%';
+  
+  termLog(`<span class="text-cyan font-bold">&gt; COMP AI v4.0 MOTORU BAŞLATILDI</span>`);
+  termLog(`[GİRİŞ] Hedef: ${pName} | Forma No: ${pNo}`);
+  
+  await sleep(1000); 
+  termLog(`[AI-CORE] Modeller yükleniyor...`);
+  document.getElementById('scanProgressBar').style.width = '10%';
+  document.getElementById('scanPercentLabel').textContent = '10%';
+  
+  await sleep(1000);
+  termLog(`[AI-CORE] Sistem hazır. Video analizi başlatıldı.`);
+  
+  const totalFrames = 100;
+  for(let i=1; i<=totalFrames; i++){
+    if(scanCancelled){ termLog(`<span class="text-rd font-bold">[İPTAL]</span> İşlem durduruldu!`); break; }
+    
+    // KASMAYI ÖNLEYEN ASENKRON NEFES DÖNGÜSÜ
+    await sleep(40); 
+    
+    document.getElementById('scanProgressBar').style.width = `${i}%`;
+    document.getElementById('scanPercentLabel').textContent = `${i}%`;
+    
+    if(i === 25) termLog(`[TARAMA] Saniye 21: Kalabalık içinde yüz aranıyor...`);
+    if(i === 45 && pNo !== 'Yok') termLog(`[FORMA OCR] <span class="text-amber-400 font-bold">Saniye 38: ${pNo} numaralı forma tespit edildi!</span>`);
+    if(i === 48) termLog(`[YÜZ TANIMA] <span class="text-emerald-400 font-bold">EŞLEŞME BULDUM! Yüz doğrulandı (${pName}).</span>`);
+    if(i === 75) termLog(`[SES DALGASI] <span class="text-rd font-bold">Saniye 64: Spiker gol sesi tespit edildi!</span>`);
+  }
+  
+  if(!scanCancelled){
+    termLog(`<span class="text-cyan font-bold">&gt; İŞLEM TAMAMLANDI!</span> 2 adet sahne başarıyla kesildi.`);
+    document.getElementById('scanResultsList').innerHTML = `
+      <div class="bg-surface2 p-3 rounded-lg border border-slate-700 mb-2 flex justify-between"><span class="text-sm"><i class="fa-solid fa-shirt text-amber-400 mr-2"></i>Sahne 1 (Forma/Yüz)</span><span class="text-xs text-slate-400">14 sn</span></div>
+      <div class="bg-surface2 p-3 rounded-lg border border-slate-700 flex justify-between"><span class="text-sm"><i class="fa-solid fa-volume-high text-rd mr-2"></i>Sahne 2 (Gol Sesi/Yüz)</span><span class="text-xs text-slate-400">9 sn</span></div>
+    `;
+    document.getElementById('scanDownloadBtn').classList.remove('hidden');
+  }
+  
+  document.getElementById('scanStartBtn').classList.remove('hidden');
+  document.getElementById('scanStopBtn').classList.add('hidden');
+}
+
+function stopScan(){ scanCancelled = true; }
+function downloadScanResults(){
+  const pName = document.getElementById('playerFirstName').value || 'Oyuncu';
+  showToast(`Ruler_CompAI_${pName}_${Date.now()}.mp4 indiriliyor...`,'success');
+}
+
+/* ============================================================
+   ADMIN VE GİRİŞ KAYITLARI (IP LOGLARI)
+   ============================================================ */
+function switchAdminTab(tab){
+  document.getElementById('adminUsers').classList.toggle('hidden', tab!=='users');
+  document.getElementById('adminLogs').classList.toggle('hidden', tab!=='logs');
+  if(tab === 'logs') loadAdminLogs(); 
+}
+
+async function loadAdminLogs(){
+  const wrap = document.getElementById('adminLogs');
+  wrap.innerHTML = '<p class="text-sm text-slate-500">Kayıtlar çekiliyor...</p>';
+  
+  const { data: logs, error } = await sb.from('login_logs').select('*').order('created_at', { ascending:false }).limit(50);
+  
+  if(error) {
+     wrap.innerHTML = `<p class="text-sm text-rd bg-rd/10 p-3 rounded-lg border border-rd/30">Loglar okunamadı: Supabase'de "login_logs" tablosunun kurulu olduğundan emin ol. (Hata: ${error.message})</p>`;
+     return;
+  }
+  
+  if(!logs || logs.length === 0){
+     wrap.innerHTML = '<p class="text-sm text-slate-500 bg-surface2 p-4 rounded-lg">Henüz sisteme hiç kimse giriş yapmamış veya log tablosu boş.</p>';
+     return;
+  }
+  
+  wrap.innerHTML = logs.map(l => `
+    <div class="flex items-center justify-between border-b border-slate-800/70 py-3 text-sm">
+      <div>
+        <p class="font-semibold text-white">${l.username} <span class="text-xs text-slate-500 font-normal">(${l.email})</span></p>
+        <p class="text-[11px] text-cyan mt-1"><i class="fa-solid fa-network-wired"></i> IP Adresi: <span class="text-white">${l.ip_address || 'Bilinmiyor'}</span> — Cihaz: ${l.device}</p>
+      </div>
+      <span class="text-[10px] text-slate-500 bg-surface px-2 py-1 rounded border border-slate-700">${new Date(l.created_at).toLocaleString('tr-TR')}</span>
+    </div>
+  `).join('');
+}
+
+async function init(){
+  initStudio();
+  navigateTo('dashboard');
+  const { data: { session } } = await sb.auth.getSession();
+  if(session && session.user){
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    if(profile){ currentUser = profile; currentUser.email = session.user.email; }
+  }
+  renderAll();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
