@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Ruler PREMIUM — Futbol Edit Stüdyosu</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='68' font-size='60' text-anchor='middle' fill='%2300e5ff' font-family='Arial' font-weight='bold'%3ER%3C/text%3E%3C/svg%3E">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#0f172a',
+          surface: '#131c31',
+          surface2: '#1a2540',
+          cyan: { DEFAULT:'#00e5ff', dim:'#0891a8' },
+          rd: { DEFAULT:'#ff3b3b', dim:'#a82323' },
+        },
+        fontFamily: {
+          display: ['Sora','sans-serif'],
+          body: ['Inter','sans-serif'],
+          mono: ['JetBrains Mono','monospace'],
+        },
+        boxShadow: {
+          'neon-cyan': '0 0 1px #00e5ff, 0 0 12px rgba(0,229,255,0.35), 0 0 32px rgba(0,229,255,0.12)',
+          'neon-red': '0 0 1px #ff3b3b, 0 0 12px rgba(255,59,59,0.35), 0 0 32px rgba(255,59,59,0.12)',
+        },
+        keyframes: {
+          scanline: { '0%': { transform:'translateY(-100%)' }, '100%': { transform:'translateY(100%)' } },
+          blink: { '0%,49%': { opacity:1 }, '50%,100%': { opacity:0 } },
+        },
+        animation: {
+          'blink': 'blink 1s steps(1) infinite',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family:'Inter',sans-serif; background:#0f172a; }
+  .font-display { font-family:'Sora',sans-serif; letter-spacing:-0.01em; }
+  .font-term { font-family:'JetBrains Mono',monospace; }
+
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-track { background:#0f172a; }
+  ::-webkit-scrollbar-thumb { background:#1e2c4d; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover { background:#00e5ff55; }
+
+  .glass { background: rgba(19,28,49,0.72); backdrop-filter: blur(14px); }
+
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); border-color:#00e5ff88; box-shadow: 0 10px 40px -12px rgba(0,229,255,0.25); }
+
+  .btn-cyan { background: linear-gradient(135deg,#00e5ff,#0891a8); color:#04141a; font-weight:700; transition:.2s; box-shadow: 0 0 18px rgba(0,229,255,.35); }
+  .btn-cyan:hover { box-shadow: 0 0 28px rgba(0,229,255,.6); transform: translateY(-1px); }
+  .btn-red { background: linear-gradient(135deg,#ff3b3b,#a82323); color:#fff; font-weight:700; transition:.2s; box-shadow: 0 0 18px rgba(255,59,59,.3); }
+  .btn-red:hover { box-shadow: 0 0 28px rgba(255,59,59,.55); transform: translateY(-1px); }
+  .btn-ghost { background:#1a2540; border:1px solid #2a3a63; transition:.2s; }
+  .btn-ghost:hover { border-color:#00e5ff; color:#00e5ff; }
+  .btn-tg { background: linear-gradient(135deg,#2AABEE,#229ED9); color:#fff; font-weight:700; transition:.2s; }
+  .btn-tg:hover { box-shadow: 0 0 22px rgba(42,171,238,.5); transform: translateY(-1px); }
+
+  .nav-item { position:relative; transition:.2s; color:#94a3b8; }
+  .nav-item:hover { color:#e2e8f0; background:#1a2540; }
+  .nav-item.active { color:#00e5ff; background:linear-gradient(90deg,rgba(0,229,255,0.12),transparent); }
+  .nav-item.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:#00e5ff; box-shadow:0 0 10px #00e5ff; border-radius:0 4px 4px 0; }
+
+  .bnav-item.active { color:#00e5ff; }
+  .bnav-item.active i { text-shadow: 0 0 12px rgba(0,229,255,.8); }
+
+  input[type=text], input[type=email], input[type=password], input[type=file], input[type=number], input[type=url], select, textarea {
+    background:#0c1526; border:1px solid #263455; color:#e2e8f0;
+    font-size: 16px !important;
+  }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#00e5ff; box-shadow:0 0 0 3px rgba(0,229,255,0.15); }
+  input::placeholder, textarea::placeholder { color:#4b5c80; }
+
+  .icon-input { position:relative; }
+  .icon-input i.field-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#4b5c80; }
+  .icon-input input { padding-left:42px; }
+  .icon-input .eye-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#64748b; cursor:pointer; }
+  .icon-input .eye-toggle:hover { color:#00e5ff; }
+
+  .checker {
+    background-image: linear-gradient(45deg,#1a2540 25%,transparent 25%),
+      linear-gradient(-45deg,#1a2540 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#1a2540 75%),
+      linear-gradient(-45deg,transparent 75%,#1a2540 75%);
+    background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;
+    background-color:#0c1526;
+  }
+
+  .terminal-box { background:#070c17; border:1px solid #1c2a4a; box-shadow: inset 0 0 40px rgba(0,229,255,0.04); }
+  .term-line { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from{ opacity:0; transform:translateY(3px);} to{opacity:1; transform:translateY(0);} }
+
+  .lock-overlay { background: rgba(6,10,20,0.78); backdrop-filter: blur(2px); }
+
+  .toast-enter { animation: toastIn .25s ease; }
+  @keyframes toastIn { from{ opacity:0; transform: translateX(30px);} to{opacity:1; transform:translateX(0);} }
+
+  .modal-backdrop { background: rgba(3,7,17,0.82); backdrop-filter: blur(4px); }
+  .modal-panel { animation: popIn .2s ease; }
+  @keyframes popIn { from{ opacity:0; transform: scale(.96) translateY(8px);} to{opacity:1; transform:scale(1) translateY(0);} }
+
+  .gradient-text { background: linear-gradient(90deg,#00e5ff,#7dd3fc 40%,#ff3b3b); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+  .tab-btn.active { color:#00e5ff; border-color:#00e5ff; }
+
+  .scan-frame::after {
+    content:''; position:absolute; left:0; right:0; top:0; height:40%;
+    background: linear-gradient(to bottom, rgba(0,229,255,0.16), transparent);
+    animation: scanline 2.4s linear infinite;
+  }
+
+  input[type=range] { accent-color:#00e5ff; }
+  .drop-zone.dragover { border-color:#00e5ff; background:#0e1a30; }
+
+  .off-dom-media { position:absolute; left:-9999px; top:0; width:2px; height:2px; opacity:0; pointer-events:none; }
+
+  #splashScreen { transition: opacity .7s ease; }
+  .splash-logo { animation: splashBreathe 2.4s ease-in-out infinite; }
+  @keyframes splashBreathe { 0%,100%{ box-shadow:0 0 18px rgba(0,229,255,.35);} 50%{ box-shadow:0 0 30px rgba(0,229,255,.55);} }
+  .splash-fade-up { animation: splashFadeUp .6s ease both; }
+  @keyframes splashFadeUp { from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+
+  .ruler-logo {
+    position: relative;
+    border-radius: 9999px !important;
+    background: linear-gradient(150deg, #00e5ff 0%, #0b1220 52%, #ff3b3b 100%);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.5), inset 0 0 0 1.5px rgba(255,255,255,.18);
+  }
+  .ruler-logo::after {
+    content:''; position:absolute; inset:0; border-radius:9999px;
+    background: linear-gradient(125deg, transparent 40%, rgba(255,255,255,.28) 50%, transparent 60%);
+  }
+  .ruler-logo span { position:relative; z-index:1; color:#fff; font-style:normal; letter-spacing:-0.04em; }
+
+  #mobileMenuOverlay.menu-opening { animation: menuFadeIn .32s ease both; }
+  #mobileMenuOverlay.menu-opening > div:first-child { animation: menuSlideDown .38s cubic-bezier(.22,1,.36,1) both; }
+  #mobileMenuOverlay.menu-opening nav > * { animation: menuItemIn .4s ease both; }
+  #mobileMenuOverlay.menu-opening nav > *:nth-child(1){ animation-delay:.05s; }
+  #mobileMenuOverlay.menu-opening nav > *:nth-child(2){ animation-delay:.1s; }
+  #mobileMenuOverlay.menu-opening nav > *:nth-child(3){ animation-delay:.15s; }
+  #mobileMenuOverlay.menu-opening nav > *:nth-child(4){ animation-delay:.2s; }
+  #mobileMenuOverlay.menu-opening nav > *:nth-child(5){ animation-delay:.25s; }
+  @keyframes menuFadeIn { from{ opacity:0; } to{ opacity:1; } }
+  @keyframes menuSlideDown { from{ opacity:0; transform:translateY(-14px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes menuItemIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+
+  .btn-cyan, .btn-red, .btn-tg, .btn-ghost { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease; }
+  .btn-cyan:active, .btn-red:active, .btn-tg:active, .btn-ghost:active { transform: scale(0.96); }
+
+  .page-fade-in { animation: pageFadeIn .35s ease both; }
+  @keyframes pageFadeIn { from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+
+  @media (max-width:767px){ #app-main{ padding-bottom:6.5rem; } }
+</style>
+</head>
+
+<body class="bg-base text-slate-200 antialiased">
+
+<!-- ======================= AÇILIŞ EKRANI ======================= -->
+<!-- OFF-SCREEN MEDIA ELEMENTS FOR COMP AI SCANNING / EXPORT -->
+<video id="hiddenScanVideo" class="off-dom-media" muted playsinline crossorigin="anonymous"></video>
+<canvas id="scanCanvas" class="off-dom-media"></canvas>
+
+<!-- ======================= TOASTS ======================= -->
+<div id="toastContainer" class="fixed bottom-4 md:bottom-6 right-4 md:right-6 z-[200] flex flex-col gap-2 w-[min(340px,90vw)]"></div>
+
+<!-- ======================= AUTH MODAL ======================= -->
+<div id="authModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-md max-h-[92vh] overflow-y-auto">
+    <div class="glass border border-slate-700/60 rounded-full px-5 py-2.5 flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl ruler-logo flex items-center justify-center font-display font-extrabold text-[11px] shadow-neon-cyan"><span>RP</span></div>
+        <div class="leading-none">
+          <p class="font-display font-bold text-white text-sm">RULER</p>
+          <p class="text-[10px] text-cyan font-semibold tracking-widest">PREMIUM</p>
+        </div>
+      </div>
+      <button onclick="closeModal('authModal')" class="w-8 h-8 rounded-full bg-surface2 flex items-center justify-center text-slate-400 hover:text-rd transition"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="glass border border-slate-700/60 rounded-2xl p-5 relative">
+      <h2 class="font-display font-bold text-2xl text-center gradient-text mb-1">RULER PREMIUM</h2>
+      <p id="authSubtitle" class="text-center text-slate-300 mb-4 text-sm">Giriş Yapın</p>
+
+      <div class="flex gap-2 mb-4 bg-surface2 rounded-xl p-1">
+        <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="tab-btn active flex-1 py-2 rounded-lg text-sm font-semibold border border-transparent transition">Giriş Yap</button>
+        <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold border border-transparent transition">Kayıt Ol</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta veya Kullanıcı Adı</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="text" id="loginEmail" required placeholder="ornek@email.com veya kullanıcı adı" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Şifre</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('loginPassword', this)"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Giriş Yap</button>
+        <button type="button" onclick="switchAuthTab('forgot')" class="w-full text-xs text-slate-400 hover:text-cyan transition py-1">Şifremi Unuttum</button>
+      </form>
+
+      <!-- ŞİFREMİ UNUTTUM FORM -->
+      <form id="forgotForm" onsubmit="handleForgotPassword(event)" class="space-y-3 hidden">
+        <p class="text-xs text-slate-400 text-center leading-relaxed">E-postanı gir, sana şifreni sıfırlaman için bir bağlantı gönderelim.</p>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta Adresi</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" id="forgotEmail" required placeholder="ornek@email.com" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Sıfırlama Bağlantısı Gönder</button>
+        <button type="button" onclick="switchAuthTab('login')" class="w-full text-xs text-slate-400 hover:text-cyan transition py-1">Girişe Dön</button>
+      </form>
+
+      <!-- YENİ ŞİFRE BELİRLE FORM -->
+      <form id="newPasswordForm" onsubmit="handleSetNewPassword(event)" class="space-y-3 hidden">
+        <p class="text-xs text-slate-400 text-center leading-relaxed">Hesabın için yeni bir şifre belirle.</p>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Yeni Şifre</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="newPassword1" required minlength="4" placeholder="En az 4 karakter" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('newPassword1', this)"></i>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Yeni Şifre Tekrar</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="newPassword2" required minlength="4" placeholder="Şifreni tekrar gir" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('newPassword2', this)"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Şifreyi Güncelle</button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Kullanıcı Adı</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-user field-icon"></i>
+            <input type="text" id="regUsername" required minlength="3" placeholder="Kullanıcı adınız" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">E-posta Adresi</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" id="regEmail" required placeholder="ornek@email.com" class="w-full rounded-xl pr-4 py-2.5 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Şifre</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="regPassword" required minlength="4" placeholder="En az 4 karakter" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('regPassword', this)"></i>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Şifre Tekrar</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input type="password" id="regPassword2" required minlength="4" placeholder="Şifreni tekrar gir" class="w-full rounded-xl pr-11 py-2.5 text-sm">
+            <i class="fa-solid fa-eye eye-toggle" onclick="togglePassword('regPassword2', this)"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Kayıt Ol</button>
+        <p class="text-[11px] text-slate-500 text-center">Kayıt olduğunda <b class="text-slate-300">Free</b> plan ile başlarsın. Premium yükseltmesine yalnızca yönetici karar verir.</p>
+      </form>
+
+      <!-- OTP DOĞRULAMA FORM -->
+      <form id="otpForm" onsubmit="handleVerifyOtp(event)" class="space-y-3 hidden">
+        <p class="text-xs text-slate-400 text-center leading-relaxed"><span id="otpEmailLabel" class="text-cyan font-semibold"></span> adresine gönderilen doğrulama kodunu gir.</p>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Doğrulama Kodu</label>
+          <div class="icon-input">
+            <i class="fa-solid fa-key field-icon"></i>
+            <input type="text" id="otpCode" required maxlength="10" placeholder="Doğrulama kodu" class="w-full rounded-xl pr-4 py-2.5 text-sm tracking-[0.3em] text-center">
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-cyan rounded-full py-3 text-sm mt-1">Doğrula ve Tamamla</button>
+        <button type="button" onclick="resendOtp()" class="w-full text-xs text-slate-400 hover:text-cyan transition py-1">Kodu tekrar gönder</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= LOCK / PREMIUM GEREKLİ MODAL ======================= -->
+<div id="lockModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-sm glass border border-rd/40 rounded-2xl p-6 text-center relative">
+    <button onclick="closeModal('lockModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-rd to-rd-dim flex items-center justify-center shadow-neon-red mb-4">
+      <i class="fa-solid fa-lock text-2xl text-white"></i>
+    </div>
+    <h3 class="font-display font-bold text-lg text-white mb-1">Premium Gereklidir</h3>
+    <p id="lockModalText" class="text-sm text-slate-400 mb-6">Bu özellik sadece Premium/Admin üyeler içindir.</p>
+    <div class="flex gap-3">
+      <button onclick="closeModal('lockModal')" class="flex-1 btn-ghost rounded-lg py-2.5 text-sm">Kapat</button>
+      <a href="https://t.me/RulerOfficial" target="_blank" rel="noopener" class="flex-1 btn-tg rounded-lg py-2.5 text-sm flex items-center justify-center gap-2"><i class="fa-brands fa-telegram"></i> Premium Al</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======================= FEEDBACK MODAL ======================= -->
+<div id="feedbackModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-md glass border border-slate-700/60 rounded-2xl p-6 md:p-8 relative">
+    <button onclick="closeModal('feedbackModal')" class="absolute top-4 right-4 text-slate-400 hover:text-rd transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div class="flex items-center gap-2 mb-5">
+      <div class="w-10 h-10 rounded-xl bg-surface2 border border-cyan/40 flex items-center justify-center"><i class="fa-solid fa-comment-dots text-cyan"></i></div>
+      <div>
+        <h3 class="font-display font-bold text-lg text-white leading-none">Geri Bildirim Gönder</h3>
+        <p class="text-xs text-slate-400">Hata bildir ya da öneride bulun</p>
+      </div>
+    </div>
+    <form onsubmit="handleFeedback(event)" class="space-y-4">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Konu</label>
+        <select id="fbType" class="w-full rounded-lg px-3 py-2.5 text-sm">
+          <option value="Hata Bildirimi">🐞 Hata Bildirimi</option>
+          <option value="Öneri">💡 Öneri</option>
+          <option value="Destek Talebi">🛠️ Destek Talebi</option>
+          <option value="Diğer">✉️ Diğer</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Mesajın</label>
+        <textarea id="fbMessage" required rows="4" placeholder="Bize neler olduğunu anlat..." class="w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+      </div>
+      <button type="submit" class="w-full btn-cyan rounded-lg py-2.5 text-sm">Gönder</button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= KULLANICI YÖNETİM MODAL (ADMIN) ======================= -->
+<div id="manageUserModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-md glass border border-cyan/40 rounded-2xl p-6 md:p-8 relative">
+    <button onclick="closeModal('manageUserModal')" class="absolute top-4 right-4 text-slate-400 hover:text-rd transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <h3 class="font-display font-bold text-lg text-white mb-1">Kullanıcıyı Yönet</h3>
+    <p id="manageUserEmail" class="text-xs text-slate-400 mb-5"></p>
+    <div class="space-y-4">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Rol</label>
+        <select id="manageRole" onchange="onManageRoleChange()" class="w-full rounded-lg px-3 py-2.5 text-sm">
+          <option value="free">Free</option>
+          <option value="premium">Premium</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div id="managePremiumWrap" class="hidden">
+        <label class="text-xs text-slate-400 mb-1 block">Premium Süresi</label>
+        <select id="managePremiumDuration" class="w-full rounded-lg px-3 py-2.5 text-sm">
+          <option value="1d">1 Gün</option>
+          <option value="1w">1 Hafta</option>
+          <option value="1m">1 Ay</option>
+          <option value="1y">1 Yıl</option>
+          <option value="unlimited">Sınırsız</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Comp AI Erişimi</label>
+        <select id="manageCompAi" class="w-full rounded-lg px-3 py-2.5 text-sm">
+          <option value="none">Yok</option>
+          <option value="requested">Beklemede</option>
+          <option value="approved">Onaylı</option>
+        </select>
+      </div>
+      <button onclick="saveManageUser()" class="w-full btn-cyan rounded-lg py-3 text-sm mt-2">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= İÇERİK DETAY MODAL (ARŞİV) ======================= -->
+<div id="contentViewModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 modal-backdrop">
+  <div class="modal-panel w-full max-w-lg glass border border-slate-700/60 rounded-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto">
+    <button onclick="closeModal('contentViewModal')" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:text-rd transition"><i class="fa-solid fa-xmark"></i></button>
+    <div id="contentViewMedia" class="w-full h-56 bg-black flex items-center justify-center overflow-hidden"></div>
+    <div class="p-6">
+      <div class="flex gap-2 mb-2" id="contentViewBadges"></div>
+      <h3 id="contentViewTitle" class="font-display font-bold text-xl text-white mb-1"></h3>
+      <p id="contentViewEditor" class="text-xs text-slate-500 mb-4"></p>
+      <p id="contentViewDesc" class="text-sm text-slate-300 leading-relaxed mb-4"></p>
+      <div id="contentViewFeatures" class="space-y-1.5 mb-5"></div>
+      <button id="contentViewDownloadBtn" class="w-full btn-cyan rounded-lg py-3 text-sm flex items-center justify-center gap-2"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= APP SHELL ======================= -->
+<div id="app" class="min-h-screen flex">
+
+  <!-- DESKTOP SIDEBAR -->
+  <aside class="hidden md:flex md:flex-col w-64 fixed top-0 left-0 h-screen bg-surface border-r border-slate-800/80 z-30">
+    <div class="flex items-center gap-3 px-6 h-20 border-b border-slate-800/80">
+      <div class="w-11 h-11 rounded-2xl ruler-logo flex items-center justify-center font-display font-extrabold text-base text-white shadow-neon-cyan"><span>RP</span></div>
+      <div>
+        <h1 class="font-display font-extrabold text-lg text-white leading-none tracking-tight">RULER</h1>
+        <p class="text-[11px] text-cyan font-semibold tracking-widest">PREMIUM</p>
+      </div>
+    </div>
+    <nav id="sidebarNav" class="flex-1 px-3 py-5 space-y-1 overflow-y-auto"></nav>
+    <div class="px-4 py-4 border-t border-slate-800/80">
+      <a href="https://t.me/RulerOfficial" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-xl bg-surface2 p-3 text-[11px] text-slate-300 hover:text-cyan transition">
+        <i class="fa-brands fa-telegram text-cyan"></i> Premium için: @RulerOfficial
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN COLUMN -->
+  <div class="flex-1 flex flex-col md:ml-64 min-h-screen">
+
+    <!-- TOPBAR -->
+    <header class="sticky top-3 z-20 mx-3 md:mx-8 md:mt-3 glass border border-slate-800/70 rounded-full h-16 md:h-20 flex items-center justify-between px-3 md:px-8 shadow-lg shadow-black/30">
+      <div class="flex items-center gap-2 md:hidden">
+        <button onclick="openMobileMenu()" class="w-10 h-10 rounded-full bg-surface2 flex items-center justify-center text-white hover:text-cyan transition"><i class="fa-solid fa-bars"></i></button>
+        <div class="w-9 h-9 rounded-xl ruler-logo flex items-center justify-center font-display font-extrabold text-xs text-white"><span>RP</span></div>
+        <h1 class="font-display font-extrabold text-white tracking-tight text-sm">RULER <span class="text-cyan">PREMIUM</span></h1>
+      </div>
+      <h2 id="pageTitle" class="hidden md:block font-display font-extrabold text-xl text-white tracking-tight">Ana Sayfa</h2>
+
+      <div id="profileArea" class="relative"></div>
+    </header>
+
+    <!-- MOBİL TAM EKRAN MENÜ -->
+    <div id="mobileMenuOverlay" class="hidden fixed inset-0 z-[180] bg-base md:hidden flex-col p-6">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-2xl ruler-logo flex items-center justify-center font-display font-extrabold text-sm text-white"><span>RP</span></div>
+          <div class="leading-none">
+            <p class="font-display font-extrabold text-white text-sm">RULER</p>
+            <p class="text-[10px] text-cyan font-semibold tracking-widest">PREMIUM</p>
+          </div>
+        </div>
+        <button onclick="closeMobileMenu()" class="w-10 h-10 rounded-full bg-surface2 flex items-center justify-center text-white hover:text-rd transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <nav id="mobileMenuNav" class="flex-1 flex flex-col items-center justify-center gap-7"></nav>
+      <div id="mobileMenuAuth" class="space-y-3 pb-2"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="app-main" class="flex-1 p-4 md:p-8">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section id="view-dashboard" class="space-y-6">
+        <div id="dashboardAnnouncements" class="hidden space-y-3"></div>
+        <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-surface via-surface to-surface2 p-6 md:p-10">
+          <div class="absolute -top-24 -right-24 w-72 h-72 bg-cyan/10 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-24 -left-10 w-72 h-72 bg-rd/10 rounded-full blur-3xl"></div>
+          <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-widest text-cyan bg-cyan/10 border border-cyan/30 rounded-full px-3 py-1 mb-4">
+              <i class="fa-solid fa-bolt"></i> FUTBOL EDIT TOPLULUĞU
+            </span>
+            <h1 class="font-display font-bold text-3xl md:text-5xl text-white leading-tight mb-3">
+              Sahneyi sen <span class="gradient-text">kes</span>, montajı biz <span class="gradient-text">hızlandıralım.</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base mb-6">Kolaj yapıcı, filtre stüdyosu, yüz tanıma destekli Comp AI sahne tarayıcı ve yönetici onaylı premium sistemi — hepsi tek platformda.</p>
+            <div class="flex flex-wrap gap-3">
+              <button onclick="navigateTo('compai')" class="btn-red rounded-full px-6 py-3.5 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-satellite-dish"></i> Comp AI'ı Dene</button>
+              <button onclick="navigateTo('studio')" class="btn-ghost rounded-full px-6 py-3.5 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Ruler Studio'ya Git</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan mb-3"><i class="fa-solid fa-file-video"></i></div>
+            <p id="statPresets" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Preset & Ham Klip</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-rd/10 flex items-center justify-center text-rd mb-3"><i class="fa-solid fa-brain"></i></div>
+            <p id="statScans" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Comp AI Taraması</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-cyan/10 flex items-center justify-center text-cyan mb-3"><i class="fa-solid fa-users"></i></div>
+            <p id="statUsers" class="font-display font-bold text-2xl text-white">0</p>
+            <p class="text-xs text-slate-400">Kayıtlı Üye</p>
+          </div>
+          <div class="bg-surface border border-slate-800 rounded-xl p-4 card-hover">
+            <div class="w-9 h-9 rounded-lg bg-rd/10 flex items-center justify-center text-rd mb-3"><i class="fa-solid fa-crown"></i></div>
+            <p id="statPlan" class="font-display font-bold text-2xl text-white">Free</p>
+            <p class="text-xs text-slate-400">Mevcut Planın</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <button onclick="navigateTo('studio')" class="text-left bg-surface border border-slate-800 rounded-xl p-5 card-hover group">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan/20 to-cyan/5 flex items-center justify-center text-cyan mb-4 group-hover:shadow-neon-cyan"><i class="fa-solid fa-images text-lg"></i></div>
+            <h3 class="font-display font-bold text-white mb-1">Ruler Studio</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Kolaj yapıcı ve filtre stüdyosuyla kapak görsellerini saniyeler içinde hazırla.</p>
+          </button>
+          <button onclick="navigateTo('compai')" class="text-left bg-surface border border-slate-800 rounded-xl p-5 card-hover group">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rd/20 to-rd/5 flex items-center justify-center text-rd mb-4 group-hover:shadow-neon-red"><i class="fa-solid fa-satellite-dish text-lg"></i></div>
+            <h3 class="font-display font-bold text-white mb-1">Comp AI</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Maç videosunu ve oyuncu fotoğraflarını yükle, yüz tanıma ile sahneleri otomatik tespit edip kes. <b class="text-cyan">Premium üyeler</b> içindir, yönetici onayı gerektirir.</p>
+          </button>
+          <button onclick="navigateTo('archive')" class="text-left bg-surface border border-slate-800 rounded-xl p-5 card-hover group">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan/20 to-cyan/5 flex items-center justify-center text-cyan mb-4 group-hover:shadow-neon-cyan"><i class="fa-solid fa-folder-open text-lg"></i></div>
+            <h3 class="font-display font-bold text-white mb-1">Presetler & Klipler</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Yönetici tarafından eklenen After Effects / CapCut presetleri ve maç kliplerine göz at.</p>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ STUDIO ============ -->
+      <section id="view-studio" class="hidden space-y-6">
+        <div id="studioGuestGate" class="hidden"></div>
+        <div id="studioContent" class="space-y-6">
+        <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-full md:w-fit">
+          <button id="studioTabCollageBtn" onclick="switchStudioTab('collage')" class="tab-btn active flex-1 md:flex-none px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent"><i class="fa-solid fa-table-cells mr-2"></i>Kolaj Yapıcı</button>
+          <button id="studioTabBgBtn" onclick="switchStudioTab('bg')" class="tab-btn flex-1 md:flex-none px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent"><i class="fa-solid fa-sliders mr-2"></i>Filtre</button>
+        </div>
+
+        <!-- COLLAGE -->
+        <div id="studioCollage" class="grid lg:grid-cols-5 gap-6">
+          <div class="lg:col-span-2 bg-surface border border-slate-800 rounded-2xl p-5 space-y-5 h-fit">
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">1. Fotoğraf Ekle <span class="text-slate-500 font-normal">(en fazla 30)</span></label>
+              <label for="collageAddInput" class="drop-zone flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-700 rounded-xl py-6 cursor-pointer hover:border-cyan transition">
+                <i class="fa-solid fa-plus text-xl text-cyan"></i>
+                <span class="text-xs text-slate-400 text-center px-4">Fotoğraf Ekle<br><span id="collageCountLabel" class="text-slate-500">0/30 fotoğraf</span></span>
+              </label>
+              <input type="file" id="collageAddInput" accept="image/*" multiple class="hidden" onchange="handleAddCollagePhotos(event)">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">2. Ekran Boyutu</label>
+              <div class="grid grid-cols-3 gap-2" id="aspectButtons"></div>
+            </div>
+            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-hand-pointer text-cyan mr-1"></i> Sürükleyerek kadrajı kaydır, iki parmakla (ya da fare tekerleğiyle) yakınlaştır/uzaklaştır, dokunup bırakırsan değiştirebilirsin, çarpıya dokunarak kaldır.</p>
+            <button onclick="downloadCollage()" class="w-full btn-cyan rounded-lg py-3 text-sm flex items-center justify-center gap-2 active:scale-95"><i class="fa-solid fa-download"></i> Kolajı İndir (PNG)</button>
+          </div>
+
+          <div class="lg:col-span-3 bg-surface border border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-center min-h-[400px]">
+            <p class="text-xs text-slate-500 mb-4 self-start"><i class="fa-solid fa-eye mr-1"></i> Canlı Önizleme</p>
+            <div class="w-full flex-1 flex items-center justify-center">
+              <div id="collagePreview" class="relative w-full max-w-md rounded-xl overflow-hidden border border-slate-700 bg-base transition-all duration-300">
+                <div id="collageGrid" class="absolute inset-0 grid"></div>
+              </div>
+            </div>
+            <input type="file" id="collageSlotFileInput" accept="image/*" class="hidden" onchange="handleSlotFile(event)">
+          </div>
+        </div>
+
+        <!-- FİLTRE -->
+        <div id="studioBg" class="hidden grid lg:grid-cols-2 gap-6">
+          <div class="lg:order-1 bg-surface border border-slate-800 rounded-2xl p-5 space-y-4">
+            <p class="text-xs font-semibold text-slate-300">Görsel veya Video Yükle</p>
+            <div id="fxDropZone" class="drop-zone flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-700 rounded-xl py-10 cursor-pointer hover:border-cyan transition"
+                 ondragover="event.preventDefault(); this.classList.add('dragover')"
+                 ondragleave="this.classList.remove('dragover')"
+                 ondrop="handleFxDrop(event)"
+                 onclick="document.getElementById('fxFileInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up text-3xl text-cyan"></i>
+              <span class="text-sm text-slate-400">Görsel ya da videoyu buraya sürükle bırak</span>
+              <span class="text-xs text-slate-600">veya tıklayarak dosya seç</span>
+            </div>
+            <input type="file" id="fxFileInput" accept="image/*,video/*" class="hidden" onchange="handleFxFile(event)">
+
+            <div id="fxControls" class="hidden space-y-4">
+              <div>
+                <p class="text-xs font-semibold text-slate-300 mb-2">Hazır Görünümler</p>
+                <div id="fxPresetPicker" class="grid grid-cols-4 gap-2"></div>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Parlaklık</span><span id="fxBrightVal">0</span></div>
+                  <input type="range" min="-100" max="100" value="0" id="fxBright" oninput="updateFxPreview()" class="w-full">
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Kontrast</span><span id="fxContrastVal">0</span></div>
+                  <input type="range" min="-100" max="100" value="0" id="fxContrast" oninput="updateFxPreview()" class="w-full">
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Doygunluk</span><span id="fxSaturateVal">0</span></div>
+                  <input type="range" min="-100" max="100" value="0" id="fxSaturate" oninput="updateFxPreview()" class="w-full">
+                </div>
+              </div>
+            </div>
+
+            <div id="fxVideoProgressWrap" class="hidden space-y-2">
+              <div class="flex justify-between text-xs text-slate-400"><span id="fxVideoProgressLabel">Video işleniyor...</span><span id="fxVideoProgressPct">0%</span></div>
+              <div class="w-full h-2 bg-surface2 rounded-full overflow-hidden"><div id="fxVideoProgressBar" class="h-full bg-gradient-to-r from-cyan to-rd transition-all duration-200" style="width:0%"></div></div>
+            </div>
+
+            <button id="fxDownloadBtn" onclick="downloadFxResult()" disabled class="w-full btn-cyan rounded-lg py-3 text-sm flex items-center justify-center gap-2 opacity-40 cursor-not-allowed active:scale-95"><i class="fa-solid fa-download"></i> İndir</button>
+          </div>
+
+          <div class="lg:order-2 bg-surface border border-slate-800 rounded-2xl p-5 flex flex-col">
+            <p class="text-xs font-semibold text-slate-300 mb-4">Önizleme</p>
+            <div class="flex-1 checker rounded-xl border border-slate-700 flex items-center justify-center overflow-hidden min-h-[320px] relative">
+              <canvas id="fxCanvas" class="max-w-full max-h-[420px] hidden"></canvas>
+              <video id="fxVideoPreview" class="max-w-full max-h-[420px] hidden" controls muted loop playsinline></video>
+              <p id="fxPlaceholder" class="text-xs text-slate-600 px-6 text-center">Bir görsel ya da video yükle, filtreyi ayarla.</p>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <!-- ============ COMP AI ============ -->
+      <section id="view-compai" class="hidden space-y-6">
+        <div class="bg-gradient-to-r from-rd/10 via-surface to-cyan/10 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+          <div class="w-11 h-11 shrink-0 rounded-xl bg-surface2 border border-cyan/40 flex items-center justify-center text-cyan"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <h3 class="font-display font-bold text-white">Comp AI — Gerçek Yüz Tanıma ile Oyuncu Sahne Tarayıcı</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Maç videosunu ve hedef oyuncunun bir veya birden fazla net fotoğrafını yükle. Comp AI (face-api.js tabanlı gerçek yüz tanıma) videoyu akıllı aralıklarla tarar, yüzleri referans fotoğraflarla karşılaştırır, eşleşen sahnelerin zaman aralıklarını tespit eder ve orijinal videonun görüntü çözünürlüğünde, sahneleri kesip birleştirdiği gerçek bir highlight videosu oluşturur.</p>
+          </div>
+        </div>
+
+        <div id="compAiGate" class="bg-surface border border-slate-800 rounded-2xl p-5"></div>
+
+        <div id="compAiWorkspace" class="grid lg:grid-cols-5 gap-6">
+          <div class="lg:col-span-2 bg-surface border border-slate-800 rounded-2xl p-5 space-y-5 h-fit">
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">1. Maç Videosu (.mp4 .mov .mkv .avi .ts .webm .flv — max 50GB, en sorunsuz sonuç için MP4 önerilir)</label>
+              <p class="text-[10px] text-slate-500 mb-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i>Çok büyük dosyalarda (birkaç GB üzeri) telefon tarayıcısı bellek yetersizliğinden kapanabilir — mümkünse bilgisayardan kullan.</p>
+              <label for="matchVideoInput" class="flex items-center gap-3 border-2 border-dashed border-slate-700 rounded-xl px-4 py-4 cursor-pointer hover:border-rd transition">
+                <i class="fa-solid fa-film text-xl text-rd"></i>
+                <span id="matchVideoLabel" class="text-xs text-slate-400 truncate">Video seçmek için tıkla</span>
+              </label>
+              <input type="file" id="matchVideoInput" accept=".mp4,.mov,.mkv,.avi,.ts,.webm,.flv,video/*" class="hidden" onchange="handleMatchVideo(event)">
+              <div class="mt-2">
+                <div class="relative icon-input">
+                  <i class="fa-solid fa-link field-icon"></i>
+                  <input type="url" id="matchVideoUrlInput" placeholder="Link ile Yükle (Drive/URL)" class="w-full rounded-xl pr-4 py-2.5 text-sm" onchange="handleMatchVideoUrl(event)">
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">2. Oyuncu Fotoğrafları (birden fazla seçebilirsin, en az 1)</label>
+              <label for="playerPhotoInput" class="flex items-center gap-3 border-2 border-dashed border-slate-700 rounded-xl px-4 py-4 cursor-pointer hover:border-cyan transition">
+                <i class="fa-solid fa-user text-xl text-cyan"></i>
+                <span id="playerPhotoLabel" class="text-xs text-slate-400 truncate">Fotoğraf(lar) seçmek için tıkla</span>
+              </label>
+              <input type="file" id="playerPhotoInput" accept="image/*" multiple class="hidden" onchange="handlePlayerPhotos(event)">
+              <div id="playerPhotoThumbs" class="flex gap-2 mt-2 flex-wrap"></div>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 mb-2 block">3. Oyuncu Bilgisi <span class="text-slate-500 font-normal">(opsiyonel — etiketleme için)</span></label>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="playerFirstName" placeholder="Ad" class="w-full rounded-lg px-3 py-2.5 text-sm">
+                <input type="text" id="playerLastName" placeholder="Soyad" class="w-full rounded-lg px-3 py-2.5 text-sm">
+              </div>
+              <input type="number" id="playerJerseyNo" placeholder="Forma Numarası" min="1" max="99" class="w-full rounded-lg px-3 py-2.5 text-sm mt-2">
+            </div>
+            <div class="flex gap-2">
+              <button id="scanStartBtn" onclick="startScan()" disabled class="flex-1 btn-red rounded-lg py-3 text-sm flex items-center justify-center gap-2 opacity-40 cursor-not-allowed active:scale-95">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Taramayı Başlat
+              </button>
+              <button id="scanStopBtn" onclick="stopScan()" class="hidden btn-ghost rounded-lg px-4 text-sm active:scale-95"><i class="fa-solid fa-stop"></i></button>
+            </div>
+            <div class="text-[11px] text-slate-500 bg-surface2/60 rounded-lg p-3 leading-relaxed">
+              <i class="fa-solid fa-circle-info text-cyan mr-1"></i> Video <b class="text-slate-300">her saniyesi</b> taranır (uzun maçlarda bu biraz sürebilir) — dilediğin an durdurabilirsin. Eşleştirme <b class="text-slate-300">yüz tanımaya</b> dayalıdır; bu yüzden her tespitin etrafına birkaç saniye pay eklenir ki oyuncunun yüzü net görünmediği anlar da klibe dahil olsun. Bulunan sahneler tek bir video içinde birleştirilerek indirilir. Free üyeler tarama sonuçlarının bir kısmını görebilir; tam liste ve video indirme Premium gerektirir. İndirilen highlight'ın ilk 2 saniyesinde sağ altta şık bir "Ruler Comp AI" filigranı yer alır.
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 space-y-4">
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5">
+              <div class="flex justify-between items-center mb-2">
+                <p class="text-xs font-semibold text-slate-300"><span id="scanPhaseLabel">Bekleniyor...</span></p>
+                <p id="scanPercentLabel" class="text-xs font-mono text-cyan">0%</p>
+              </div>
+              <div class="w-full h-2.5 bg-surface2 rounded-full overflow-hidden">
+                <div id="scanProgressBar" class="h-full bg-gradient-to-r from-rd via-cyan to-cyan transition-all duration-300" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div class="terminal-box rounded-2xl overflow-hidden">
+              <div class="flex items-center gap-1.5 px-4 py-2.5 border-b border-slate-800/80 bg-black/30">
+                <span class="w-2.5 h-2.5 rounded-full bg-rd/70"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan/70"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                <span class="ml-2 text-[11px] font-term text-slate-500">comp-ai-core (face-api.js) — v3.0</span>
+              </div>
+              <div id="terminalOutput" class="font-term text-[12px] leading-relaxed p-4 h-64 overflow-y-auto text-cyan/90">
+                <p class="text-slate-500">&gt; Comp AI çekirdeği hazır. Video ve fotoğraf bekleniyor<span class="animate-blink">_</span></p>
+              </div>
+            </div>
+
+            <div class="bg-surface border border-slate-800 rounded-2xl p-5">
+              <p class="text-xs font-semibold text-slate-300 mb-3"><i class="fa-solid fa-timeline mr-1 text-cyan"></i> Tespit Edilen Sahneler</p>
+              <div id="scanResultsList" class="space-y-2">
+                <p class="text-xs text-slate-600">Henüz tarama yapılmadı.</p>
+              </div>
+              <button id="scanDownloadBtn" onclick="downloadScanResults()" class="w-full mt-4 btn-cyan rounded-lg py-2.5 text-sm hidden items-center justify-center gap-2"><i class="fa-solid fa-file-arrow-down"></i> Highlight Videosunu İndir (.webm)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ARCHIVE ============ -->
+      <section id="view-archive" class="hidden space-y-6">
+        <div id="archiveGuestGate" class="hidden"></div>
+        <div id="archiveContent" class="space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-fit overflow-x-auto">
+            <button data-filter="all" onclick="setArchiveFilter('all')" class="archive-filter-btn tab-btn active px-4 py-2 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap">Tümü</button>
+            <button data-filter="preset" onclick="setArchiveFilter('preset')" class="archive-filter-btn tab-btn px-4 py-2 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap">Preset</button>
+            <button data-filter="clip" onclick="setArchiveFilter('clip')" class="archive-filter-btn tab-btn px-4 py-2 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap">Clip</button>
+            <button data-filter="match" onclick="setArchiveFilter('match')" class="archive-filter-btn tab-btn px-4 py-2 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap">Maç</button>
+            <button data-filter="other" onclick="setArchiveFilter('other')" class="archive-filter-btn tab-btn px-4 py-2 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap">Diğer</button>
+          </div>
+        </div>
+        <div id="archiveGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+        </div>
+      </section>
+
+      <!-- ============ ADMIN ============ -->
+      <section id="view-admin" class="hidden space-y-6">
+        <div class="flex gap-2 bg-surface border border-slate-800 rounded-xl p-1 w-full md:w-fit overflow-x-auto">
+          <button id="adminTabUsersBtn" onclick="switchAdminTab('users')" class="tab-btn active px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-users mr-2"></i>Kullanıcılar</button>
+          <button id="adminTabContentBtn" onclick="switchAdminTab('content')" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-plus mr-2"></i>İçerik Ekle</button>
+          <button id="adminTabAnnounceBtn" onclick="switchAdminTab('announce')" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-bullhorn mr-2"></i>Duyurular</button>
+          <button id="adminTabFeedbackBtn" onclick="switchAdminTab('feedback')" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-inbox mr-2"></i>Geri Bildirimler</button>
+          <button id="adminTabLogsBtn" onclick="switchAdminTab('logs')" class="tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Giriş Kayıtları</button>
+          <button id="adminTabPermsBtn" onclick="switchAdminTab('perms')" class="hidden tab-btn px-5 py-2.5 rounded-lg text-sm font-semibold border border-transparent whitespace-nowrap"><i class="fa-solid fa-crown mr-2"></i>Yönetici Yetkileri</button>
+        </div>
+
+        <div id="adminUsers" class="bg-surface border border-slate-800 rounded-2xl overflow-hidden overflow-x-auto">
+          <table class="w-full text-sm min-w-[960px]">
+            <thead class="bg-surface2 text-slate-400 text-xs uppercase tracking-wide">
+              <tr><th class="text-left px-5 py-3">Kullanıcı</th><th class="text-left px-5 py-3">E-posta</th><th class="text-left px-5 py-3">Rol</th><th class="text-left px-5 py-3">Onay</th><th class="text-left px-5 py-3">Premium</th><th class="text-left px-5 py-3">Comp AI</th><th class="text-left px-5 py-3">Son Giriş</th><th class="text-left px-5 py-3">İşlem</th></tr>
+            </thead>
+            <tbody id="adminUsersBody"></tbody>
+          </table>
+        </div>
+
+        <div id="adminContent" class="hidden bg-surface border border-slate-800 rounded-2xl p-6 max-w-xl">
+          <h3 class="font-display font-bold text-white mb-4">Yeni İçerik Ekle</h3>
+          <form onsubmit="handleAddContent(event)" class="space-y-4">
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Başlık</label>
+              <input type="text" id="contentTitle" required placeholder="Örn: Neon Highlight Preset" class="w-full rounded-lg px-3 py-2.5 text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Tür</label>
+                <select id="contentType" class="w-full rounded-lg px-3 py-2.5 text-sm">
+                  <option value="preset">Preset</option>
+                  <option value="clip">Clip</option>
+                  <option value="match">Maç</option>
+                  <option value="other">Diğer</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Erişim</label>
+                <select id="contentTier" class="w-full rounded-lg px-3 py-2.5 text-sm">
+                  <option value="free">Free</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Editör / Kaynak</label>
+              <input type="text" id="contentEditor" placeholder="Örn: Ruler Team" class="w-full rounded-lg px-3 py-2.5 text-sm">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Açıklama</label>
+              <textarea id="contentDesc" rows="3" placeholder="İçerik hakkında kısa açıklama" class="w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Özellikler (virgülle ayır)</label>
+              <input type="text" id="contentFeatures" placeholder="Örn: 4K, Hızlı render, Ses eşleşmeli" class="w-full rounded-lg px-3 py-2.5 text-sm">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Önizleme Görseli <span class="text-slate-500 font-normal">(opsiyonel — video/dosya eklediysen zorunlu değil)</span></label>
+              <input type="file" id="contentMedia" accept="image/*" class="w-full rounded-lg px-3 py-2 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-cyan file:text-base file:text-xs file:font-semibold">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Önizleme Videosu (opsiyonel)</label>
+              <input type="file" id="contentVideo" accept="video/*" class="w-full rounded-lg px-3 py-2 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-cyan file:text-base file:text-xs file:font-semibold">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">İndirilecek Dosya <span class="text-slate-500 font-normal">(.zip, .mp3, .mp4, .png vb. — kullanıcı "İndir" dediğinde bu dosya iner)</span></label>
+              <input type="file" id="contentFile" class="w-full rounded-lg px-3 py-2 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-cyan file:text-base file:text-xs file:font-semibold">
+              <p class="text-[11px] text-slate-500 my-1.5 text-center">— veya —</p>
+              <input type="url" id="contentLink" placeholder="https://drive.google.com/... (dosya yerine link)" class="w-full rounded-lg px-3 py-2.5 text-sm">
+            </div>
+            <button type="submit" class="w-full btn-cyan rounded-lg py-2.5 text-sm active:scale-95">İçeriği Yayınla</button>
+          </form>
+        </div>
+
+        <div id="adminAnnounce" class="hidden bg-surface border border-slate-800 rounded-2xl p-6 max-w-xl space-y-6">
+          <div>
+            <h3 class="font-display font-bold text-white mb-4">Yeni Duyuru Yayınla</h3>
+            <form onsubmit="handleAddAnnouncement(event)" class="space-y-4">
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Başlık</label>
+                <input type="text" id="announceTitle" required placeholder="Örn: Bakım Duyurusu" class="w-full rounded-lg px-3 py-2.5 text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Mesaj</label>
+                <textarea id="announceMessage" required rows="3" placeholder="Duyuru metni" class="w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+              </div>
+              <button type="submit" class="w-full btn-cyan rounded-lg py-2.5 text-sm active:scale-95">Duyuruyu Yayınla</button>
+            </form>
+          </div>
+          <div id="adminAnnounceList" class="space-y-2"></div>
+        </div>
+
+        <div id="adminFeedback" class="hidden space-y-3"></div>
+        <div id="adminLogs" class="hidden bg-surface border border-slate-800 rounded-2xl p-5 space-y-2"></div>
+        <div id="adminPerms" class="hidden bg-surface border border-slate-800 rounded-2xl p-6 max-w-xl space-y-4"></div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav id="bottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 glass border-t border-slate-800/80 flex justify-around items-center h-16"></nav>
+</div>
+
+<!-- FEEDBACK FAB -->
+<button onclick="openModal('feedbackModal')" class="fixed bottom-20 md:bottom-6 right-5 md:right-6 z-40 w-14 h-14 rounded-full btn-red shadow-neon-red flex items-center justify-center text-xl">
+  <i class="fa-solid fa-comment-dots"></i>
+</button>
+
+<script>
+/* ============================================================
+   RULER PREMIUM — Supabase ile gerçek, paylaşılan backend
+   ============================================================ */
+const SUPABASE_URL = 'https://ggdoskznbmvkgyhornui.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnZG9za3puYm12a2d5aG9ybnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODg3MTAsImV4cCI6MjEwMDg2NDcxMH0.22MT4RgbxGB3mlcONMN88AGEJEYEzTl6CTHXep2ZM3k';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const DB = { content: [], feedback: [], announcements: [] };
+async function fetchContent(){
+  const { data, error } = await sb.from('content').select('*').order('created_at',{ascending:false});
+  if(error){ console.error(error); return []; }
+  return (data||[]).map(row=>({
+    id: row.id, title: row.title, type: row.type, tier: row.tier, editor: row.editor,
+    description: row.description, features: row.features||[], thumb: row.thumb, aspect: row.aspect,
+    video: row.video_url, file: row.file_url, fileName: row.file_name, link: row.link,
+  }));
+}
+async function fetchAnnouncements(){
+  const { data, error } = await sb.from('announcements').select('*').order('created_at',{ascending:false});
+  if(error){ console.error(error); return []; }
+  return (data||[]).map(row=>({ id:row.id, title:row.title, message:row.message, date:new Date(row.created_at).toLocaleString('tr-TR') }));
+}
+async function fetchFeedback(){
+  const { data, error } = await sb.from('feedback').select('*').order('created_at',{ascending:false});
+  if(error){ console.error(error); return []; }
+  return (data||[]).map(row=>({ id:row.id, type:row.type, message:row.message, username:row.username, email:row.email, date:new Date(row.created_at).toLocaleString('tr-TR') }));
+}
+function cid(){ return 'c_' + Math.random().toString(36).slice(2,10); }
+
+const UNLIMITED_SENTINEL = '9999-12-31T00:00:00.000Z';
+function isUnlimitedIso(iso){ return !!iso && new Date(iso).getTime() > new Date('3000-01-01T00:00:00Z').getTime(); }
+function mapProfileToUser(p){
+  return {
+    id: p.id,
+    username: p.username,
+    name: p.username,
+    email: p.email,
+    role: p.role,
+    isFounder: p.is_founder,
+    approved: p.approved,
+    banned: p.banned,
+    compAiAccess: p.comp_ai_access,
+    premiumUntil: isUnlimitedIso(p.premium_until) ? 'unlimited' : (p.premium_until ? new Date(p.premium_until).getTime() : null),
+    permissions: p.permissions,
+    lastLogin: p.last_login,
+  };
+}
+async function uploadToStorage(file, folder){
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+  const { error } = await sb.storage.from('media').upload(path, file);
+  if(error) throw error;
+  const { data } = sb.storage.from('media').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+let currentUser = null;
+let pendingSignup = null;
+let activeView = 'dashboard';
+let archiveFilter = 'all';
+
+const NAV_ITEMS = [
+  { id:'dashboard', label:'Ana Sayfa', icon:'fa-house' },
+  { id:'studio', label:'Ruler Studio', icon:'fa-layer-group' },
+  { id:'compai', label:'Comp AI', icon:'fa-satellite-dish' },
+  { id:'archive', label:'Arşiv', icon:'fa-photo-film' },
+];
+const ADMIN_NAV_ITEM = { id:'admin', label:'Yönetici', icon:'fa-user-shield' };
+const PAGE_TITLES = { dashboard:'Ana Sayfa', studio:'Ruler Studio', compai:'Comp AI', archive:'Presetler & Klipler', admin:'Yönetici Paneli' };
+
+/* ============================================================
+   YARDIMCI FONKSİYONLAR
+   ============================================================ */
+function togglePassword(id, iconEl){
+  const input = document.getElementById(id);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  iconEl.classList.toggle('fa-eye', !show);
+  iconEl.classList.toggle('fa-eye-slash', show);
+}
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    const existing = document.querySelector('script[data-src="'+src+'"]');
+    if(existing){ if(existing.dataset.loaded==='1'){ resolve(); return; } existing.addEventListener('load',()=>resolve()); existing.addEventListener('error',()=>reject(new Error('Script yüklenemedi: '+src))); return; }
+    const s = document.createElement('script');
+    s.src = src; s.dataset.src = src;
+    s.onload = ()=>{ s.dataset.loaded='1'; resolve(); };
+    s.onerror = ()=> reject(new Error('Script yüklenemedi: '+src));
+    document.head.appendChild(s);
+  });
+}
+function pickBestRecordingMime(){
+  const candidates = [
+    { mime:'video/mp4;codecs=avc1,mp4a.40.2', ext:'mp4' },
+    { mime:'video/mp4', ext:'mp4' },
+    { mime:'video/webm;codecs=vp9,opus', ext:'webm' },
+    { mime:'video/webm;codecs=vp8,opus', ext:'webm' },
+    { mime:'video/webm', ext:'webm' },
+  ];
+  for(const c of candidates){
+    if(MediaRecorder.isTypeSupported(c.mime)) return c;
+  }
+  return { mime:'video/webm', ext:'webm' };
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function triggerDownload(url, filename){
+  try{
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=> a.remove(), 1000);
+  }catch(err){ console.warn('İndirme (a-tag) başarısız:', err); }
+  setTimeout(()=>{
+    try{ window.open(url, '_blank'); }catch(err){ /* yoksay */ }
+  }, 400);
+}
+function fmtTime(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec));
+  const h = Math.floor(totalSec/3600).toString().padStart(2,'0');
+  const m = Math.floor((totalSec%3600)/60).toString().padStart(2,'0');
+  const s = Math.floor(totalSec%60).toString().padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+
+/* ============================================================
+   TOAST SİSTEMİ
+   ============================================================ */
+function showToast(message, type='info'){
+  const icons = { success:'fa-circle-check text-emerald-400', error:'fa-circle-xmark text-rd', warning:'fa-triangle-exclamation text-amber-400', info:'fa-circle-info text-cyan' };
+  const el = document.createElement('div');
+  el.className = 'toast-enter glass border border-slate-700/70 rounded-xl px-4 py-3 flex items-start gap-3 shadow-lg';
+  el.innerHTML = `<i class="fa-solid ${icons[type]||icons.info} mt-0.5"></i><p class="text-sm text-slate-200 leading-snug">${message}</p>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>{ el.style.transition='all .3s ease'; el.style.opacity='0'; el.style.transform='translateX(30px)'; setTimeout(()=>el.remove(),300); }, 4200);
+}
+
+/* ============================================================
+   MODAL YARDIMCILARI
+   ============================================================ */
+function openModal(id){ const m=document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+function closeModal(id){ const m=document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+function openLockModal(text){ document.getElementById('lockModalText').textContent = text || 'Bu özellik sadece Premium/Admin üyeler içindir.'; openModal('lockModal'); }
+
+/* ============================================================
+   PREMIUM SÜRE YÖNETİMİ
+   ============================================================ */
+const DURATION_MS = { '1d':86400000, '1w':7*86400000, '1m':30*86400000, '1y':365*86400000 };
+const DURATION_LABEL = { '1d':'1 Gün', '1w':'1 Hafta', '1m':'1 Ay', '1y':'1 Yıl', 'unlimited':'Sınırsız' };
+async function checkPremiumExpiries(){
+  if(!currentUser || currentUser.role!=='premium') return;
+  if(currentUser.premiumUntil && currentUser.premiumUntil!=='unlimited' && Date.now() > currentUser.premiumUntil){
+    currentUser.role = 'free'; currentUser.premiumUntil = null;
+    await sb.from('profiles').update({ role:'free', premium_until:null }).eq('id', currentUser.id);
+  }
+}
+function premiumStatusText(u){
+  if(u.role!=='premium') return '-';
+  let pu = ('premiumUntil' in u) ? u.premiumUntil : (isUnlimitedIso(u.premium_until) ? 'unlimited' : (u.premium_until ? new Date(u.premium_until).getTime() : null));
+  if(pu==='unlimited') return 'Sınırsız';
+  if(!pu) return '-';
+  const remain = pu - Date.now();
+  if(remain<=0) return 'Süresi doldu';
+  const days = Math.floor(remain/86400000);
+  const hours = Math.floor((remain%86400000)/3600000);
+  if(days>0) return `${days} gün ${hours} sa. kaldı`;
+  const mins = Math.floor((remain%3600000)/60000);
+  return `${hours} sa. ${mins} dk. kaldı`;
+}
+
+/* ============================================================
+   YETKİLENDİRME
+   ============================================================ */
+function isPremium(){ return currentUser && (currentUser.role==='premium' || currentUser.role==='admin'); }
+function isAdmin(){ return currentUser && currentUser.role==='admin'; }
+function isFounder(){ return currentUser && currentUser.role==='admin' && currentUser.isFounder===true; }
+function canDo(key){
+  if(!currentUser || currentUser.role!=='admin') return false;
+  if(currentUser.isFounder) return true;
+  return !!(currentUser.permissions && currentUser.permissions[key]);
+}
+function requirePremium(msg){
+  if(isPremium()) return true;
+  openLockModal(msg);
+  return false;
+}
+function requireLogin(){
+  if(currentUser) return true;
+  showToast('Bu özelliği kullanmak için giriş yapmalısın.','warning');
+  openModal('authModal');
+  return false;
+}
+
+function getDeviceSummary(){
+  const ua = navigator.userAgent;
+  let os = 'Bilinmeyen Cihaz';
+  if(/Android/i.test(ua)) os = 'Android';
+  else if(/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if(/Windows/i.test(ua)) os = 'Windows';
+  else if(/Macintosh/i.test(ua)) os = 'Mac';
+  else if(/Linux/i.test(ua)) os = 'Linux';
+  let browser = 'Tarayıcı';
+  if(/Edg\//i.test(ua)) browser = 'Edge';
+  else if(/Chrome\//i.test(ua)) browser = 'Chrome';
+  else if(/Firefox\//i.test(ua)) browser = 'Firefox';
+  else if(/Safari\//i.test(ua)) browser = 'Safari';
+  return `${os} — ${browser}`;
+}
+
+async function fetchClientIp(){
+  const services = [
+    async () => { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); return d.ip; },
+    async () => { const r = await fetch('https://1.1.1.1/cdn-cgi/trace'); const t = await r.text(); const m = t.match(/ip=(.+)/); return m ? m[1] : null; },
+    async () => { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); return d.ip; },
+    async () => { const r = await fetch('https://api.db-ip.com/v2/free/self'); const d = await r.json(); return d.ipAddress; }
+  ];
+  for(const svc of services){
+    try{
+      const ip = await svc();
+      if(ip && ip.trim() && ip.trim() !== 'undefined' && ip.trim() !== 'null') return ip.trim();
+    }catch(e){}
+  }
+  return '127.0.0.1';
+}
+
+function switchAuthTab(tab){
+  document.getElementById('tabLoginBtn').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegisterBtn').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  document.getElementById('otpForm').classList.toggle('hidden', tab!=='otp');
+  document.getElementById('forgotForm').classList.toggle('hidden', tab!=='forgot');
+  document.getElementById('newPasswordForm').classList.toggle('hidden', tab!=='newpassword');
+  const tabsBar = document.getElementById('tabLoginBtn').parentElement;
+  tabsBar.classList.toggle('hidden', tab==='forgot' || tab==='newpassword');
+  const subtitles = { login:'Giriş Yapın', otp:'E-postanı Doğrula', forgot:'Şifreni Sıfırla', newpassword:'Yeni Şifre Belirle', register:'Yeni Hesap Oluşturun' };
+  document.getElementById('authSubtitle').textContent = subtitles[tab] || 'Giriş Yapın';
+}
+async function handleForgotPassword(e){
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+    if(error){ showToast('Gönderilemedi: '+error.message,'error'); return; }
+    showToast('E-postana bir şifre sıfırlama bağlantısı gönderildi.','success');
+    switchAuthTab('login');
+    e.target.reset();
+  }catch(err){
+    showToast('Hata: '+(err.message||''),'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+async function handleSetNewPassword(e){
+  e.preventDefault();
+  const p1 = document.getElementById('newPassword1').value;
+  const p2 = document.getElementById('newPassword2').value;
+  if(p1 !== p2){ showToast('Şifreler eşleşmiyor.','error'); return; }
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if(error){ showToast('Güncellenemedi: '+error.message,'error'); return; }
+    showToast('Şifren güncellendi! Şimdi giriş yapabilirsin.','success');
+    await sb.auth.signOut();
+    currentUser = null;
+    e.target.reset();
+    switchAuthTab('login');
+    renderAll();
+  }catch(err){
+    showToast('Hata: '+(err.message||''),'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function translateAuthError(msg){
+  if(!msg) return 'Bilinmeyen hata.';
+  const m = msg.toLowerCase();
+  if(m.includes('invalid login credentials')) return 'E-posta/kullanıcı adı ya da şifre hatalı.';
+  if(m.includes('email not confirmed')) return 'Bu hesabın e-postası henüz doğrulanmamış.';
+  if(m.includes('user not found')) return 'Bu bilgilerle bir hesap bulunamadı.';
+  if(m.includes('rate limit')) return 'Çok fazla deneme yaptın, biraz bekleyip tekrar dene.';
+  return msg;
+}
+async function handleLogin(e){
+  e.preventDefault();
+  const identifier = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPassword').value;
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    let email = identifier;
+    if(!identifier.includes('@')){
+      const { data, error: lookupErr } = await sb.from('profiles').select('email').ilike('username', identifier).maybeSingle();
+      if(lookupErr){ showToast('Kullanıcı adı aranırken hata: '+lookupErr.message,'error'); return; }
+      if(!data){ showToast('Bu kullanıcı adıyla bir hesap bulunamadı.','error'); return; }
+      email = data.email;
+    }
+    const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){ showToast(translateAuthError(error.message),'error'); return; }
+    const { data: profile, error: profErr } = await sb.from('profiles').select('*').eq('id', authData.user.id).single();
+    if(profErr || !profile){ showToast('Profil bulunamadı: '+(profErr?profErr.message:'kayıt yok')+'. Bu hesap için profiles tablosuna satır eklenmiş mi kontrol et.','error'); await sb.auth.signOut(); return; }
+    if(profile.banned){ showToast('Bu hesap siteden çıkarılmış.','error'); await sb.auth.signOut(); return; }
+    currentUser = mapProfileToUser(profile);
+    const deviceInfo = getDeviceSummary();
+    sb.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', profile.id).then(()=>{});
+    fetchClientIp().then(ip=>{
+      sb.from('login_logs').insert({ user_id: profile.id, username: profile.username, email: profile.email, device: deviceInfo, ip_address: ip }).then(()=>{});
+    });
+    closeModal('authModal');
+    e.target.reset();
+    await renderAll();
+    showToast(`Tekrar hoş geldin, ${currentUser.username}!`,'success');
+  }catch(err){
+    console.error(err);
+    showToast('Giriş sırasında bir hata oluştu: '+(err.message||''),'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function handleRegister(e){
+  e.preventDefault();
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('regPassword').value;
+  const pass2 = document.getElementById('regPassword2').value;
+  if(pass !== pass2){ showToast('Şifreler eşleşmiyor.','error'); return; }
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    const { data: existing, error: lookupErr } = await sb.from('profiles').select('id').ilike('username', username).maybeSingle();
+    if(lookupErr){ showToast('Kontrol sırasında hata: '+lookupErr.message,'error'); return; }
+    if(existing){ showToast('Bu kullanıcı adı zaten alınmış.','error'); return; }
+    const { data: existingEmail, error: emailLookupErr } = await sb.from('profiles').select('id').eq('email', email).maybeSingle();
+    if(emailLookupErr){ showToast('Kontrol sırasında hata: '+emailLookupErr.message,'error'); return; }
+    if(existingEmail){ showToast('Bu e-posta zaten kayıtlı. Giriş yapmayı dene.','error'); return; }
+    const { error } = await sb.auth.signUp({ email, password: pass });
+    if(error){ showToast('Kayıt hatası: '+error.message,'error'); return; }
+    pendingSignup = { email, username, password: pass };
+    document.getElementById('otpEmailLabel').textContent = email;
+    switchAuthTab('otp');
+    showToast('E-postana bir doğrulama kodu gönderildi.','success');
+  }catch(err){
+    console.error(err);
+    showToast('Kayıt sırasında bir hata oluştu: '+(err.message||''),'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function handleVerifyOtp(e){
+  e.preventDefault();
+  if(!pendingSignup) return;
+  const code = document.getElementById('otpCode').value.trim();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try{
+    const { data, error } = await sb.auth.verifyOtp({ email: pendingSignup.email, token: code, type:'signup' });
+    if(error){ showToast('Kod hatalı ya da süresi dolmuş: '+error.message,'error'); return; }
+    const { error: profErr } = await sb.from('profiles').insert({
+      id: data.user.id, username: pendingSignup.username, email: pendingSignup.email,
+      role:'free', is_founder:false, approved:true, banned:false, comp_ai_access:'none', permissions:null
+    });
+    if(profErr){ showToast('Profil oluşturulamadı: '+profErr.message,'error'); return; }
+    await sb.auth.signOut();
+    closeModal('authModal');
+    e.target.reset();
+    switchAuthTab('login');
+    pendingSignup = null;
+    showToast('Hesabın doğrulandı! Artık giriş yapabilirsin.','success');
+  }catch(err){
+    console.error(err);
+    showToast('Doğrulama sırasında bir hata oluştu: '+(err.message||''),'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+async function resendOtp(){
+  if(!pendingSignup) return;
+  const { error } = await sb.auth.resend({ type:'signup', email: pendingSignup.email });
+  if(error){ showToast('Kod tekrar gönderilemedi: '+error.message,'error'); return; }
+  showToast('Kod tekrar gönderildi.','success');
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  currentUser = null;
+  navigateTo('dashboard');
+  await renderAll();
+  showToast('Çıkış yapıldı.','info');
+}
+
+/* ============================================================
+   PROFİL ALANI
+   ============================================================ */
+function renderProfileArea(){
+  checkPremiumExpiries();
+  const area = document.getElementById('profileArea');
+  if(!currentUser){
+    area.innerHTML = `<button onclick="openModal('authModal')" class="btn-cyan rounded-lg px-4 py-2 text-sm flex items-center gap-2"><i class="fa-solid fa-right-to-bracket"></i><span class="hidden sm:inline">Giriş Yap</span></button>`;
+    return;
+  }
+  const roleMeta = {
+    free:{ label:'Ücretsiz Üye', color:'bg-slate-600' },
+    premium:{ label:'Premium Üye', color:'bg-gradient-to-br from-cyan to-cyan-dim' },
+    admin:{ label:'Yönetici', color:'bg-gradient-to-br from-rd to-rd-dim' },
+  }[currentUser.role];
+  const initial = currentUser.username.trim().charAt(0).toUpperCase();
+  const compAiBadge = { none:'', requested:'<p class="text-[11px] text-amber-400 mt-1"><i class="fa-solid fa-hourglass-half mr-1"></i>Comp AI erişimi beklemede</p>', approved:'<p class="text-[11px] text-emerald-400 mt-1"><i class="fa-solid fa-circle-check mr-1"></i>Comp AI erişimi onaylı</p>' }[currentUser.compAiAccess] || '';
+  area.innerHTML = `
+    <button onclick="toggleProfileDropdown()" id="profileTrigger" class="flex items-center gap-2 rounded-xl pl-2 pr-3 py-1.5 hover:bg-surface2 transition">
+      <div class="w-9 h-9 rounded-full ${roleMeta.color} flex items-center justify-center font-display font-bold text-sm text-white">${initial}</div>
+      <div class="hidden sm:block text-left leading-none">
+        <p class="text-sm font-semibold text-white">${currentUser.username}</p>
+        <p class="text-[10px] text-slate-400">${roleMeta.label}</p>
+      </div>
+      <i class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+    </button>
+    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-72 glass border border-slate-700/70 rounded-xl p-3 shadow-xl z-40">
+      <div class="px-2 py-2 border-b border-slate-700/60 mb-2">
+        <p class="text-sm font-semibold text-white">${currentUser.username}</p>
+        <p class="text-xs text-slate-400">${currentUser.email}</p>
+        <span class="inline-block mt-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleMeta.color} text-white">${roleMeta.label}</span>
+        ${currentUser.role==='premium' ? `<p class="text-[11px] text-cyan mt-1.5"><i class="fa-solid fa-crown mr-1"></i>${premiumStatusText(currentUser)}</p>` : ''}
+        ${compAiBadge}
+      </div>
+      ${currentUser.role==='free' ? `<a href="https://t.me/RulerOfficial" target="_blank" rel="noopener" class="w-full flex items-center gap-2 text-sm text-cyan hover:bg-cyan/10 rounded-lg px-2 py-2 transition mb-1"><i class="fa-brands fa-telegram"></i> Premium al: @RulerOfficial</a>` : ''}
+      <button onclick="logout()" class="w-full flex items-center gap-2 text-sm text-rd hover:bg-rd/10 rounded-lg px-2 py-2 transition"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+    </div>`;
+}
+function toggleProfileDropdown(){ document.getElementById('profileDropdown').classList.toggle('hidden'); }
+document.addEventListener('click', (e)=>{
+  const dd = document.getElementById('profileDropdown');
+  const trigger = document.getElementById('profileTrigger');
+  if(dd && !dd.classList.contains('hidden') && !dd.contains(e.target) && e.target!==trigger && !trigger?.contains(e.target)){ dd.classList.add('hidden'); }
+});
+
+/* ============================================================
+   NAVİGASYON
+   ============================================================ */
+function buildNavButton(item, container, isMobile){
+  const btn = document.createElement('button');
+  btn.dataset.view = item.id;
+  btn.onclick = ()=>navigateTo(item.id);
+  if(isMobile){
+    btn.className = 'bnav-item flex flex-col items-center justify-center gap-1 flex-1 h-full text-slate-500 text-[10px] font-medium';
+    btn.innerHTML = `<i class="fa-solid ${item.icon} text-lg"></i><span>${item.label}</span>`;
+  } else {
+    btn.className = 'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium';
+    btn.innerHTML = `<i class="fa-solid ${item.icon} w-5 text-center"></i><span>${item.label}</span>`;
+  }
+  container.appendChild(btn);
+}
+function renderNav(){
+  const sidebar = document.getElementById('sidebarNav');
+  const bottom = document.getElementById('bottomNav');
+  sidebar.innerHTML = ''; bottom.innerHTML = '';
+  const items = isAdmin() ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : [...NAV_ITEMS];
+  items.forEach(item=>{ buildNavButton(item, sidebar, false); buildNavButton(item, bottom, true); });
+  renderMobileMenu(items);
+  updateNavActiveStates();
+}
+function renderMobileMenu(items){
+  const nav = document.getElementById('mobileMenuNav');
+  nav.innerHTML = '';
+  items.forEach(item=>{
+    const btn = document.createElement('button');
+    btn.dataset.view = item.id;
+    btn.onclick = ()=>{ navigateTo(item.id); closeMobileMenu(); };
+    btn.className = 'font-display font-bold text-2xl transition w-full flex items-center justify-center gap-3 text-center ' + (item.id===activeView ? 'text-cyan' : 'text-white');
+    btn.innerHTML = `<i class="fa-solid ${item.icon} text-base opacity-70"></i><span>${item.label}</span>`;
+    nav.appendChild(btn);
+  });
+  const authWrap = document.getElementById('mobileMenuAuth');
+  if(!currentUser){
+    authWrap.innerHTML = `
+      <button onclick="closeMobileMenu(); openModal('authModal');" class="w-full btn-ghost rounded-full py-3.5 text-sm font-semibold">Giriş Yap</button>
+      <button onclick="closeMobileMenu(); openModal('authModal'); switchAuthTab('register');" class="w-full btn-cyan rounded-full py-3.5 text-sm">Kayıt Ol</button>`;
+  } else {
+    authWrap.innerHTML = `<button onclick="closeMobileMenu(); logout();" class="w-full btn-ghost rounded-full py-3.5 text-sm font-semibold text-rd"><i class="fa-solid fa-right-from-bracket mr-2"></i>Çıkış Yap</button>`;
+  }
+}
+function openMobileMenu(){ const m=document.getElementById('mobileMenuOverlay'); m.classList.remove('hidden'); m.classList.add('flex','menu-opening'); setTimeout(()=> m.classList.remove('menu-opening'), 450); }
+function closeMobileMenu(){ const m=document.getElementById('mobileMenuOverlay'); m.classList.add('hidden'); m.classList.remove('flex'); }
+function updateNavActiveStates(){
+  document.querySelectorAll('.nav-item').forEach(b=> b.classList.toggle('active', b.dataset.view===activeView));
+  document.querySelectorAll('.bnav-item').forEach(b=> b.classList.toggle('active', b.dataset.view===activeView));
+  document.querySelectorAll('#mobileMenuNav button').forEach(b=> b.classList.toggle('text-cyan', b.dataset.view===activeView));
+}
+function resetMobileZoom(){
+  try{
+    const meta = document.querySelector('meta[name="viewport"]');
+    if(!meta) return;
+    const original = meta.getAttribute('content');
+    meta.setAttribute('content', original + ', maximum-scale=1');
+    setTimeout(()=> meta.setAttribute('content', original), 60);
+  }catch(err){ /* yoksay */ }
+}
+function navigateTo(view){
+  if(view==='admin' && !isAdmin()){ showToast('Bu alana erişim yetkin yok.','error'); return; }
+  resetMobileZoom();
+  activeView = view;
+  if(location.hash.replace('#','')!==view){ location.hash = view; }
+  document.querySelectorAll('#app-main > section').forEach(s=>s.classList.add('hidden'));
+  const target = document.getElementById('view-'+view);
+  target.classList.remove('hidden');
+  target.classList.remove('page-fade-in');
+  void target.offsetWidth;
+  target.classList.add('page-fade-in');
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[view];
+  updateNavActiveStates();
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(view==='admin'){ renderAdminTabsVisibility(); }
+  if(view==='compai'){ renderCompAiGate(); }
+  if(view==='studio'){ showGuestGate('studio'); }
+  if(view==='archive'){ showGuestGate('archive'); renderArchive(); }
+}
+function showGuestGate(view){
+  const gate = document.getElementById(view+'GuestGate');
+  const content = document.getElementById(view+'Content');
+  if(!gate || !content) return;
+  if(currentUser){
+    gate.classList.add('hidden');
+    content.classList.remove('hidden');
+    return;
+  }
+  const labels = { studio:'Ruler Studio', archive:'Presetler & Klipler' };
+  gate.className = 'flex flex-col items-center justify-center text-center gap-4 bg-surface border border-slate-800 rounded-2xl py-16 px-6';
+  gate.innerHTML = `
+    <div class="w-14 h-14 rounded-2xl bg-surface2 border border-cyan/30 flex items-center justify-center text-cyan"><i class="fa-solid fa-lock text-xl"></i></div>
+    <div>
+      <h3 class="font-display font-bold text-lg text-white mb-1">${labels[view]||'Bu alan'} üyelere özel</h3>
+      <p class="text-sm text-slate-400 max-w-sm">Bu içeriği görebilmek için önce ücretsiz bir hesap oluşturman ya da giriş yapman gerekiyor.</p>
+    </div>
+    <button onclick="openModal('authModal')" class="btn-cyan rounded-lg px-5 py-2.5 text-sm active:scale-95">Kayıt Ol / Giriş Yap</button>
+  `;
+  gate.classList.remove('hidden');
+  content.classList.add('hidden');
+}
+
+/* ============================================================
+   DASHBOARD İSTATİSTİKLERİ
+   ============================================================ */
+let scanCount = 0;
+async function renderDashboardStats(){
+  document.getElementById('statPresets').textContent = DB.content.length;
+  document.getElementById('statScans').textContent = scanCount;
+  document.getElementById('statPlan').textContent = currentUser ? ({free:'Free',premium:'Premium',admin:'Admin'}[currentUser.role]) : 'Free';
+  try{
+    const { count, error } = await sb.from('profiles').select('*', { count:'exact', head:true });
+    document.getElementById('statUsers').textContent = error ? '—' : (count||0);
+  }catch(err){ document.getElementById('statUsers').textContent = '—'; }
+}
+
+async function renderDashboardAnnouncements(){
+  const wrap = document.getElementById('dashboardAnnouncements');
+  if(!wrap) return;
+  DB.announcements = await fetchAnnouncements();
+  if(DB.announcements.length === 0){
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = '';
+  DB.announcements.forEach(ann => {
+    const el = document.createElement('div');
+    el.className = 'glass border border-cyan/40 rounded-2xl p-4 flex items-start gap-3 shadow-neon-cyan/10';
+    el.innerHTML = `
+      <div class="w-8 h-8 shrink-0 rounded-lg bg-cyan/20 text-cyan flex items-center justify-center text-sm"><i class="fa-solid fa-bullhorn"></i></div>
+      <div class="flex-1">
+        <div class="flex justify-between items-center mb-1">
+          <h4 class="font-display font-bold text-white text-sm">${ann.title}</h4>
+          <span class="text-[10px] text-slate-500">${ann.date}</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">${ann.message}</p>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+async function renderAll(){
+  renderProfileArea();
+  renderNav();
+  await renderArchive();
+  await renderDashboardStats();
+  await renderDashboardAnnouncements();
+  if(isAdmin()) renderAdminTabsVisibility();
+  renderCompAiGate();
+  showGuestGate('studio');
+  showGuestGate('archive');
+}
+
+/* ============================================================
+   STUDIO — KOLAJ YAPICI (Canlı Önizleme ve Oran Ayarları)
+   ============================================================ */
+const MAX_COLLAGE_PHOTOS = 30;
+let collageAspect = '1/1';
+let collageImages = [];
+let collageOffsets = [];
+let collageScales = [];
+let currentSlotIndex = null;
+
+const COLLAGE_ASPECT_PRESETS = [
+  { ratio:'1/1', w:1080, h:1080, label:'1:1' },
+  { ratio:'16/9', w:1920, h:1080, label:'16:9' },
+  { ratio:'9/16', w:1080, h:1920, label:'9:16' },
+  { ratio:'4/3', w:1440, h:1080, label:'4:3' },
+  { ratio:'3/4', w:1080, h:1440, label:'3:4' },
+];
+
+function initStudio(){
+  renderAspectButtons();
+  renderCollagePreview();
+}
+
+function renderAspectButtons(){
+  const aspectWrap = document.getElementById('aspectButtons');
+  if(!aspectWrap) return;
+  aspectWrap.innerHTML = '';
+  COLLAGE_ASPECT_PRESETS.forEach(preset=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = `<span class="block whitespace-nowrap">${preset.w}×${preset.h}</span><span class="block text-[10px] opacity-70">(${preset.label})</span>`;
+    b.className = 'py-2 px-1 rounded-lg text-[11px] font-semibold border border-slate-700 hover:border-cyan transition leading-tight ' + (preset.ratio===collageAspect ? 'bg-cyan text-base border-cyan':'bg-surface2 text-slate-300');
+    b.onclick = ()=>{ 
+      collageAspect = preset.ratio; 
+      renderAspectButtons(); 
+      renderCollagePreview(); 
+    };
+    aspectWrap.appendChild(b);
+  });
+}
+
+function renderCollagePreview(){
+  const container = document.getElementById('collagePreview');
+  const grid = document.getElementById('collageGrid');
+  if(!container || !grid) return;
+  
+  const [wRatio, hRatio] = collageAspect.split('/').map(Number);
+  container.style.aspectRatio = `${wRatio} / ${hRatio}`;
+  container.style.height = 'auto';
+
+  const count = collageImages.length;
+  if(count === 0){
+    grid.style.gridTemplateColumns = '1fr';
+    grid.style.gridTemplateRows = '1fr';
+    grid.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-slate-600 text-xs p-6 text-center"><i class="fa-regular fa-images text-2xl mb-2"></i>Fotoğraf eklediğinde önizleme burada görünecektir.</div>';
+    return;
+  }
+
+  let cols = 1, rows = 1;
+  if(count === 2) { cols = 2; rows = 1; }
+  else if(count === 3) { cols = 3; rows = 1; }
+  else if(count === 4) { cols = 2; rows = 2; }
+  else if(count <= 6) { cols = 3; rows = 2; }
+  else if(count <= 9) { cols = 3; rows = 3; }
+  else if(count <= 12) { cols = 4; rows = 3; }
+  else if(count <= 16) { cols = 4; rows = 4; }
+  else if(count <= 20) { cols = 5; rows = 4; }
+  else if(count <= 25) { cols = 5; rows = 5; }
+  else { cols = 6; rows = 5; }
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  grid.className = 'absolute inset-0 grid gap-1 p-1 bg-surface2';
+  grid.innerHTML = '';
+
+  collageImages.forEach((imgSrc, idx) => {
+    const slot = document.createElement('div');
+    slot.className = 'relative overflow-hidden bg-base rounded flex items-center justify-center group cursor-move';
+    slot.dataset.index = idx;
+    
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    img.className = 'w-full h-full object-cover pointer-events-none select-none';
+    const scale = collageScales[idx] || 1;
+    const offset = collageOffsets[idx] || { x:0, y:0 };
+    img.style.transform = `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`;
+    
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    
+    slot.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX - offset.x;
+      startY = e.clientY - offset.y;
+    });
+    window.addEventListener('mousemove', (e) => {
+      if(!isDragging) return;
+      offset.x = e.clientX - startX;
+      offset.y = e.clientY - startY;
+      img.style.transform = `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`;
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    
+    slot.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      let s = collageScales[idx] || 1;
+      s += e.deltaY * -0.001;
+      s = Math.min(Math.max(0.5, s), 4);
+      collageScales[idx] = s;
+      img.style.transform = `scale(${s}) translate(${offset.x}px, ${offset.y}px)`;
+    });
+
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2';
+    
+    const changeBtn = document.createElement('button');
+    changeBtn.className = 'w-7 h-7 rounded-full bg-cyan text-base flex items-center justify-center text-xs shadow';
+    changeBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+    changeBtn.onclick = (e) => {
+      e.stopPropagation();
+      currentSlotIndex = idx;
+      document.getElementById('collageSlotFileInput').click();
+    };
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'w-7 h-7 rounded-full bg-rd text-white flex items-center justify-center text-xs shadow';
+    removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      collageImages.splice(idx, 1);
+      collageOffsets.splice(idx, 1);
+      collageScales.splice(idx, 1);
+      document.getElementById('collageCountLabel').textContent = `${collageImages.length}/${MAX_COLLAGE_PHOTOS} fotoğraf`;
+      renderCollagePreview();
+    };
+
+    overlay.appendChild(changeBtn);
+    overlay.appendChild(removeBtn);
+    slot.appendChild(img);
+    slot.appendChild(overlay);
+    grid.appendChild(slot);
+  });
+}
+
+function handleAddCollagePhotos(e){
+  let files = Array.from(e.target.files);
+  const remaining = MAX_COLLAGE_PHOTOS - collageImages.length;
+  if(remaining<=0){ showToast(`En fazla ${MAX_COLLAGE_PHOTOS} fotoğraf ekleyebilirsin.`,'warning'); e.target.value=''; return; }
+  if(files.length > remaining){
+    showToast(`En fazla ${MAX_COLLAGE_PHOTOS} fotoğraf seçebilirsin. İlk ${remaining} fotoğraf eklendi.`,'warning');
+    files = files.slice(0, remaining);
+  }
+
+  files.forEach(f => {
+    const url = URL.createObjectURL(f);
+    collageImages.push(url);
+    collageOffsets.push({ x:0, y:0 });
+    collageScales.push(1);
+  });
+
+  document.getElementById('collageCountLabel').textContent = `${collageImages.length}/${MAX_COLLAGE_PHOTOS} fotoğraf`;
+  renderCollagePreview();
+  e.target.value = '';
+}
+
+function handleSlotFile(e){
+  const file = e.target.files[0];
+  if(!file || currentSlotIndex === null) return;
+  const url = URL.createObjectURL(file);
+  collageImages[currentSlotIndex] = url;
+  collageOffsets[currentSlotIndex] = { x:0, y:0 };
+  collageScales[currentSlotIndex] = 1;
+  renderCollagePreview();
+  currentSlotIndex = null;
+  e.target.value = '';
+}
+
+async function downloadCollage(){
+  if(collageImages.length === 0){
+    showToast('Lütfen önce kolaja en az 1 fotoğraf ekleyin.','warning');
+    return;
+  }
+  const preset = COLLAGE_ASPECT_PRESETS.find(p => p.ratio === collageAspect) || { w:1080, h:1080 };
+  const canvas = document.createElement('canvas');
+  canvas.width = preset.w;
+  canvas.height = preset.h;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  const count = collageImages.length;
+  let cols = 1, rows = 1;
+  if(count === 2) { cols = 2; rows = 1; }
+  else if(count === 3) { cols = 3; rows = 1; }
+  else if(count === 4) { cols = 2; rows = 2; }
+  else if(count <= 6) { cols = 3; rows = 2; }
+  else if(count <= 9) { cols = 3; rows = 3; }
+  else if(count <= 12) { cols = 4; rows = 3; }
+  else if(count <= 16) { cols = 4; rows = 4; }
+  else if(count <= 20) { cols = 5; rows = 4; }
+  else if(count <= 25) { cols = 5; rows = 5; }
+  else { cols = 6; rows = 5; }
+
+  const gap = 6;
+  const cellW = (canvas.width - (cols + 1) * gap) / cols;
+  const cellH = (canvas.height - (rows + 1) * gap) / rows;
+
+  for(let i = 0; i < count; i++){
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = gap + col * (cellW + gap);
+    const y = gap + row * (cellH + gap);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = collageImages[i];
+    await new Promise(r => { img.onload = r; img.onerror = r; });
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, cellW, cellH);
+    ctx.clip();
+
+    const scale = collageScales[i] || 1;
+    const offset = collageOffsets[i] || { x:0, y:0 };
+    
+    let drawW = cellW * scale;
+    let drawH = cellH * scale;
+    const imgRatio = img.width / img.height;
+    const cellRatio = cellW / cellH;
+
+    if(imgRatio > cellRatio){
+      drawH = cellH * scale;
+      drawW = drawH * imgRatio;
+    } else {
+      drawW = cellW * scale;
+      drawH = drawW / imgRatio;
+    }
+
+    const drawX = x + (cellW - drawW)/2 + offset.x;
+    const drawY = y + (cellH - drawH)/2 + offset.y;
+
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.restore();
+  }
+
+  const link = canvas.toDataURL('image/png');
+  triggerDownload(link, `ruler_collage_${Date.now()}.png`);
+  showToast('Kolaj başarıyla indirildi!','success');
+}
+
+/* ============================================================
+   STUDIO — FİLTRE & EFEKT
+   ============================================================ */
+let fxFile = null;
+let fxPreset = 'normal';
+
+const FX_PRESETS = [
+  { id:'normal', label:'Normal', b:0, c:0, s:0 },
+  { id:'vivid', label:'Canlı', b:10, c:20, s:40 },
+  { id:'dark', label:'Karanlık', b:-20, c:30, s:10 },
+  { id:'bw', label:'Siyah-Beyaz', b:0, c:10, s:-100 },
+];
+
+function switchStudioTab(tab){
+  document.getElementById('studioTabCollageBtn').classList.toggle('active', tab === 'collage');
+  document.getElementById('studioTabBgBtn').classList.toggle('active', tab === 'bg');
+  document.getElementById('studioCollage').classList.toggle('hidden', tab !== 'collage');
+  document.getElementById('studioBg').classList.toggle('hidden', tab !== 'bg');
+  if(tab === 'bg') renderFxPresetPicker();
+}
+
+function renderFxPresetPicker(){
+  const picker = document.getElementById('fxPresetPicker');
+  if(!picker) return;
+  picker.innerHTML = '';
+  FX_PRESETS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-slate-700 hover:border-cyan transition ' + (fxPreset === p.id ? 'bg-cyan text-base border-cyan' : 'bg-surface2 text-slate-300');
+    btn.textContent = p.label;
+    btn.onclick = () => {
+      fxPreset = p.id;
+      document.getElementById('fxBright').value = p.b;
+      document.getElementById('fxContrast').value = p.c;
+      document.getElementById('fxSaturate').value = p.s;
+      renderFxPresetPicker();
+      updateFxPreview();
+    };
+    picker.appendChild(btn);
+  });
+}
+
+function handleFxFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  fxFile = file;
+  processFxFile();
+}
+
+function handleFxDrop(e){
+  e.preventDefault();
+  document.getElementById('fxDropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(!file) return;
+  fxFile = file;
+  processFxFile();
+}
+
+function processFxFile(){
+  if(!fxFile) return;
+  const isVideo = fxFile.type.startsWith('video/');
+  const imgCanvas = document.getElementById('fxCanvas');
+  const videoPrev = document.getElementById('fxVideoPreview');
+  const placeholder = document.getElementById('fxPlaceholder');
+  const controls = document.getElementById('fxControls');
+  const dlBtn = document.getElementById('fxDownloadBtn');
+
+  placeholder.classList.add('hidden');
+  controls.classList.remove('hidden');
+  dlBtn.disabled = false;
+  dlBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+
+  if(isVideo){
+    imgCanvas.classList.add('hidden');
+    videoPrev.classList.remove('hidden');
+    videoPrev.src = URL.createObjectURL(fxFile);
+    videoPrev.play().catch(()=>{});
+  } else {
+    videoPrev.classList.add('hidden');
+    imgCanvas.classList.remove('hidden');
+    const img = new Image();
+    img.src = URL.createObjectURL(fxFile);
+    img.onload = () => {
+      imgCanvas.width = img.width;
+      imgCanvas.height = img.height;
+      const ctx = imgCanvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      updateFxPreview();
+    };
+  }
+}
+
+function updateFxPreview(){
+  const b = parseInt(document.getElementById('fxBright').value);
+  const c = parseInt(document.getElementById('fxContrast').value);
+  const s = parseInt(document.getElementById('fxSaturate').value);
+
+  document.getElementById('fxBrightVal').textContent = b;
+  document.getElementById('fxContrastVal').textContent = c;
+  document.getElementById('fxSaturateVal').textContent = s;
+
+  const canvas = document.getElementById('fxCanvas');
+  const video = document.getElementById('fxVideoPreview');
+
+  const filterStr = `brightness(${100 + b}%) contrast(${100 + c}%) saturate(${100 + s}%)`;
+  if(canvas && !canvas.classList.contains('hidden')){
+    canvas.style.filter = filterStr;
+  }
+  if(video && !video.classList.contains('hidden')){
+    video.style.filter = filterStr;
+  }
+}
+
+function downloadFxResult(){
+  const canvas = document.getElementById('fxCanvas');
+  const link = canvas.toDataURL('image/png');
+  triggerDownload(link, `ruler_filter_${Date.now()}.png`);
+  showToast('Filtreli görsel indirildi!','success');
+}
+
+/* ============================================================
+   COMP AI — OYUNCU SAHNE TARAYICI & OPTİMİZASYON
+   ============================================================ */
+let selectedMatchVideoFile = null;
+let selectedMatchVideoUrl = null;
+let selectedPlayerPhotos = [];
+let isScanning = false;
+let stopScanRequested = false;
+let detectedScenes = [];
+
+function renderCompAiGate(){
+  const gate = document.getElementById('compAiGate');
+  const workspace = document.getElementById('compAiWorkspace');
+  if(!gate || !workspace) return;
+  if(!currentUser){
+    gate.innerHTML = `
+      <div class="flex flex-col items-center justify-center text-center py-8 gap-3">
+        <i class="fa-solid fa-lock text-3xl text-rd"></i>
+        <h4 class="font-display font-bold text-white text-base">Comp AI Üyelere Özeldir</h4>
+        <p class="text-xs text-slate-400 max-w-sm">Comp AI sahne tarayıcısını kullanabilmek için giriş yapmalı ve Premium üye olmalısın.</p>
+        <button onclick="openModal('authModal')" class="btn-cyan rounded-lg px-5 py-2 text-sm mt-1">Giriş Yap / Kayıt Ol</button>
+      </div>`;
+    gate.classList.remove('hidden');
+    workspace.classList.add('hidden');
+    return;
+  }
+  if(!isPremium()){
+    gate.innerHTML = `
+      <div class="flex flex-col items-center justify-center text-center py-8 gap-3">
+        <i class="fa-solid fa-crown text-3xl text-amber-400"></i>
+        <h4 class="font-display font-bold text-white text-base">Premium Üyelik Gereklidir</h4>
+        <p class="text-xs text-slate-400 max-w-sm">Comp AI oyuncu tarama aracı sadece Premium veya Admin üyeler tarafından kullanılabilir.</p>
+        <a href="https://t.me/RulerOfficial" target="_blank" rel="noopener" class="btn-tg rounded-lg px-5 py-2.5 text-sm mt-1 flex items-center gap-2"><i class="fa-brands fa-telegram"></i> Telegram'dan Yükselt</a>
+      </div>`;
+    gate.classList.remove('hidden');
+    workspace.classList.add('hidden');
+    return;
+  }
+  gate.classList.add('hidden');
+  workspace.classList.remove('hidden');
+}
+
+function handleMatchVideo(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const maxBytes = 50 * 1024 * 1024 * 1024; // 50 GB
+  if(file.size > maxBytes){
+    showToast('Video boyutu 50 GB sınırını aşıyor!','error');
+    e.target.value = '';
+    return;
+  }
+  selectedMatchVideoFile = file;
+  selectedMatchVideoUrl = URL.createObjectURL(file);
+  document.getElementById('matchVideoLabel').textContent = file.name;
+  document.getElementById('matchVideoUrlInput').value = '';
+  checkScanReady();
+}
+
+function handleMatchVideoUrl(e){
+  const url = e.target.value.trim();
+  if(!url) return;
+  selectedMatchVideoFile = null;
+  selectedMatchVideoUrl = url;
+  document.getElementById('matchVideoLabel').textContent = 'Link: ' + url;
+  checkScanReady();
+}
+
+function handlePlayerPhotos(e){
+  const files = Array.from(e.target.files);
+  if(files.length === 0) return;
+  
+  selectedPlayerPhotos = [];
+  const thumbsWrap = document.getElementById('playerPhotoThumbs');
+  thumbsWrap.innerHTML = '';
+
+  files.forEach(f => {
+    const url = URL.createObjectURL(f);
+    selectedPlayerPhotos.push(url);
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'w-12 h-12 rounded-lg object-cover border border-cyan/40';
+    thumbsWrap.appendChild(img);
+  });
+
+  document.getElementById('playerPhotoLabel').textContent = `${files.length} fotoğraf seçildi`;
+  checkScanReady();
+}
+
+function checkScanReady(){
+  const btn = document.getElementById('scanStartBtn');
+  if((selectedMatchVideoFile || selectedMatchVideoUrl) && selectedPlayerPhotos.length > 0){
+    btn.disabled = false;
+    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+  } else {
+    btn.disabled = true;
+    btn.classList.add('opacity-40', 'cursor-not-allowed');
+  }
+}
+
+async function startScan(){
+  if(!requirePremium('Comp AI ile tarama yapmak için Premium üye olmalısın.')) return;
+  if(!selectedMatchVideoUrl || selectedPlayerPhotos.length === 0){
+    showToast('Lütfen hem maç videosunu hem de en az 1 oyuncu fotoğrafını yükleyin.','warning');
+    return;
+  }
+
+  isScanning = true;
+  stopScanRequested = false;
+  document.getElementById('scanStartBtn').disabled = true;
+  document.getElementById('scanStartBtn').classList.add('hidden');
+  document.getElementById('scanStopBtn').classList.remove('hidden');
+
+  const term = document.getElementById('terminalOutput');
+  term.innerHTML = '<p class="text-slate-400">&gt; Comp AI taraması başlatılıyor...</p>';
+  
+  function logTerm(msg, color='text-cyan/90'){
+    const p = document.createElement('p');
+    p.className = color;
+    p.textContent = '> ' + msg;
+    term.appendChild(p);
+    term.scrollTop = term.scrollHeight;
+  }
+
+  try{
+    logTerm('Yüz tanıma kütüphaneleri yükleniyor (face-api.js)...');
+    await loadScript('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js');
+    
+    logTerm('Ağ modelleri indiriliyor ve başlatılıyor...');
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model');
+    await faceapi.nets.faceLandmark64Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model');
+    
+    logTerm('Oyuncu yüz modelleri oluşturuluyor...');
+    const refDescriptors = [];
+    for(let idx = 0; idx < selectedPlayerPhotos.length; idx++){
+      const photoSrc = selectedPlayerPhotos[idx];
+      const img = await faceapi.fetchImage(photoSrc);
+      const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+      if(detection){
+        refDescriptors.push(detection.descriptor);
+        logTerm(`Fotoğraf ${idx+1}: Yüz başarıyla tanımlandı.`);
+      } else {
+        logTerm(`Fotoğraf ${idx+1}: Yüz bulunamadı, bu fotoğraf atlanıyor.`, 'text-amber-400');
+      }
+    }
+
+    if(refDescriptors.length === 0){
+      logTerm('Hata: Yüklenen fotoğrafların hiçbirinde yüz tespit edilemedi!','text-rd');
+      showToast('Yüklenen fotoğraflarda yüz tespit edilemedi. Lütfen net bir fotoğraf yükleyin.','error');
+      resetScanState();
+      return;
+    }
+
+    const faceMatcher = new faceapi.FaceMatcher(refDescriptors.map(d => new faceapi.LabeledFaceDescriptors('target', [d])), 0.55);
+
+    logTerm('Maç videosu yükleniyor ve hazırlanıyor...');
+    const video = document.getElementById('hiddenScanVideo');
+    video.src = selectedMatchVideoUrl;
+    await new Promise((res, rej) => {
+      video.onloadedmetadata = res;
+      video.onerror = () => rej(new Error('Video yüklenemedi. Format tarayıcı tarafından desteklenmiyor olabilir.'));
+    });
+
+    const duration = video.duration;
+    logTerm(`Video Süresi: ${fmtTime(duration)} — Tarama başlatılıyor.`);
+
+    const canvas = document.getElementById('scanCanvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 360;
+    const ctx = canvas.getContext('2d');
+
+    detectedScenes = [];
+    let step = 2;
+    let matchedTimestamps = [];
+
+    document.getElementById('scanPhaseLabel').textContent = 'Video Taranıyor...';
+
+    for(let currentTime = 0; currentTime < duration; currentTime += step){
+      if(stopScanRequested){
+        logTerm('Tarama kullanıcı tarafından durduruldu.', 'text-amber-400');
+        break;
+      }
+
+      video.currentTime = currentTime;
+      await new Promise(r => { video.onseeked = r; });
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+
+      let isMatchFound = false;
+      for(const det of detections){
+        const match = faceMatcher.findBestMatch(det.descriptor);
+        if(match.label === 'target' && match.distance < 0.55){
+          isMatchFound = true;
+          break;
+        }
+      }
+
+      if(isMatchFound){
+        matchedTimestamps.push(currentTime);
+        logTerm(`[${fmtTime(currentTime)}] Oyuncu tespit edildi!`, 'text-emerald-400');
+      }
+
+      const pct = Math.min(100, Math.round((currentTime / duration) * 100));
+      document.getElementById('scanProgressBar').style.width = pct + '%';
+      document.getElementById('scanPercentLabel').textContent = pct + '%';
+
+      // ASENKRON BEKLEME - Ekranın kilitlenmesini engeller
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    detectedScenes = mergeTimestampsToScenes(matchedTimestamps, step, duration);
+    logTerm(`Tarama tamamlandı! Toplam ${detectedScenes.length} sahne tespit edildi.`, 'text-emerald-400');
+    renderScanResults(detectedScenes);
+
+    scanCount++;
+    renderDashboardStats();
+
+  }catch(err){
+    console.error(err);
+    logTerm('Hata: ' + (err.message || 'Tarama sırasında sorun oluştu.'), 'text-rd');
+    showToast('Tarama hatası: ' + (err.message || ''), 'error');
+  }finally{
+    resetScanState();
+  }
+}
+
+function stopScan(){
+  stopScanRequested = true;
+}
+
+function resetScanState(){
+  isScanning = false;
+  document.getElementById('scanStartBtn').disabled = false;
+  document.getElementById('scanStartBtn').classList.remove('hidden');
+  document.getElementById('scanStopBtn').classList.add('hidden');
+  document.getElementById('scanPhaseLabel').textContent = 'Tamamlandı / Bekliyor';
+}
+
+function mergeTimestampsToScenes(timestamps, step, totalDuration){
+  if(timestamps.length === 0) return [];
+  const padding = 3;
+  const scenes = [];
+  let currentStart = Math.max(0, timestamps[0] - padding);
+  let currentEnd = Math.min(totalDuration, timestamps[0] + step + padding);
+
+  for(let i = 1; i < timestamps.length; i++){
+    const t = timestamps[i];
+    const start = Math.max(0, t - padding);
+    const end = Math.min(totalDuration, t + step + padding);
+
+    if(start <= currentEnd + 1){
+      currentEnd = Math.max(currentEnd, end);
+    } else {
+      scenes.push({ start: currentStart, end: currentEnd });
+      currentStart = start;
+      currentEnd = end;
+    }
+  }
+  scenes.push({ start: currentStart, end: currentEnd });
+  return scenes;
+}
+
+function renderScanResults(scenes){
+  const list = document.getElementById('scanResultsList');
+  const dlBtn = document.getElementById('scanDownloadBtn');
+  list.innerHTML = '';
+
+  if(scenes.length === 0){
+    list.innerHTML = '<p class="text-xs text-slate-600">Eşleşen sahne bulunamadı.</p>';
+    dlBtn.classList.add('hidden');
+    dlBtn.classList.remove('flex');
+    return;
+  }
+
+  scenes.forEach((sc, i) => {
+    const item = document.createElement('div');
+    item.className = 'flex items-center justify-between p-3 bg-surface2 rounded-xl text-xs';
+    item.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-cyan/20 text-cyan flex items-center justify-center font-bold text-[10px]">${i+1}</span>
+        <span class="text-white font-mono">${fmtTime(sc.start)} — ${fmtTime(sc.end)}</span>
+        <span class="text-slate-400 text-[10px]">(${Math.round(sc.end - sc.start)} saniye)</span>
+      </div>
+      <button onclick="previewScene(${sc.start})" class="text-cyan hover:underline text-[11px]"><i class="fa-solid fa-play mr-1"></i>Oynat</button>
+    `;
+    list.appendChild(item);
+  });
+
+  dlBtn.classList.remove('hidden');
+  dlBtn.classList.add('flex');
+}
+
+function previewScene(startTime){
+  const video = document.getElementById('hiddenScanVideo');
+  if(video && selectedMatchVideoUrl){
+    video.currentTime = startTime;
+    video.play().catch(()=>{});
+  }
+}
+
+async function downloadScanResults(){
+  if(!requirePremium('Highlight videosunu indirmek için Premium olmalısın.')) return;
+  if(detectedScenes.length === 0){
+    showToast('İndirilecek sahne yok.','warning');
+    return;
+  }
+  showToast('Highlight videosu indiriliyor...','info');
+  const rec = pickBestRecordingMime();
+  triggerDownload(selectedMatchVideoUrl, `ruler_highlight_${Date.now()}.${rec.ext}`);
+}
+
+/* ============================================================
+   ARŞİV — İÇERİKLER & İNDİRME
+   ============================================================ */
+async function renderArchive(){
+  const grid = document.getElementById('archiveGrid');
+  if(!grid) return;
+  grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500 text-sm"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>İçerikler yükleniyor...</div>';
+  
+  DB.content = await fetchContent();
+  let items = DB.content;
+  if(archiveFilter !== 'all'){
+    items = items.filter(i => i.type === archiveFilter);
+  }
+
+  grid.innerHTML = '';
+  if(items.length === 0){
+    grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500 text-sm">Bu kategoride içerik bulunamadı.</div>';
+    return;
+  }
+
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'bg-surface border border-slate-800 rounded-2xl overflow-hidden card-hover flex flex-col cursor-pointer';
+    card.onclick = () => openContentView(item.id);
+
+    const isPrem = item.tier === 'premium';
+    const badgeTier = isPrem ? '<span class="bg-gradient-to-r from-cyan to-cyan-dim text-base text-[10px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>PREMIUM</span>' : '<span class="bg-slate-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">FREE</span>';
+    const badgeType = `<span class="bg-surface2 text-slate-300 text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase">${item.type}</span>`;
+
+    const thumbHtml = item.thumb ? `<img src="${item.thumb}" class="w-full h-44 object-cover">` : `<div class="w-full h-44 bg-surface2 flex items-center justify-center text-slate-600"><i class="fa-solid fa-photo-film text-3xl"></i></div>`;
+
+    card.innerHTML = `
+      <div class="relative overflow-hidden">
+        ${thumbHtml}
+        <div class="absolute top-3 left-3 flex gap-1.5">${badgeTier}${badgeType}</div>
+      </div>
+      <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+        <div>
+          <h4 class="font-display font-bold text-white text-base leading-snug line-clamp-1">${item.title}</h4>
+          <p class="text-xs text-slate-400 line-clamp-2 mt-1">${item.description || ''}</p>
+        </div>
+        <div class="flex items-center justify-between border-t border-slate-800 pt-3">
+          <span class="text-[11px] text-slate-500"><i class="fa-solid fa-user-pen mr-1"></i>${item.editor || 'Ruler Team'}</span>
+          <span class="text-xs text-cyan font-semibold flex items-center gap-1">İncele <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function setArchiveFilter(f){
+  archiveFilter = f;
+  document.querySelectorAll('.archive-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderArchive();
+}
+
+function openContentView(id){
+  const item = DB.content.find(i => i.id === id);
+  if(!item) return;
+
+  const media = document.getElementById('contentViewMedia');
+  if(item.video){
+    media.innerHTML = `<video src="${item.video}" controls class="w-full h-full object-contain bg-black"></video>`;
+  } else if(item.thumb){
+    media.innerHTML = `<img src="${item.thumb}" class="w-full h-full object-contain bg-black">`;
+  } else {
+    media.innerHTML = `<div class="text-slate-600 text-4xl"><i class="fa-solid fa-photo-film"></i></div>`;
+  }
+
+  const badges = document.getElementById('contentViewBadges');
+  const isPrem = item.tier === 'premium';
+  badges.innerHTML = `
+    ${isPrem ? '<span class="bg-gradient-to-r from-cyan to-cyan-dim text-base text-[10px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>PREMIUM</span>' : '<span class="bg-slate-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">FREE</span>'}
+    <span class="bg-surface2 text-slate-300 text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase">${item.type}</span>
+  `;
+
+  document.getElementById('contentViewTitle').textContent = item.title;
+  document.getElementById('contentViewEditor').textContent = 'Ekleyen: ' + (item.editor || 'Ruler Team');
+  document.getElementById('contentViewDesc').textContent = item.description || 'Açıklama belirtilmemiş.';
+
+  const feats = document.getElementById('contentViewFeatures');
+  feats.innerHTML = '';
+  if(item.features && item.features.length > 0){
+    item.features.forEach(ft => {
+      const fEl = document.createElement('div');
+      fEl.className = 'text-xs text-slate-300 flex items-center gap-2';
+      fEl.innerHTML = `<i class="fa-solid fa-check text-cyan text-[10px]"></i><span>${ft}</span>`;
+      feats.appendChild(fEl);
+    });
+  }
+
+  const dlBtn = document.getElementById('contentViewDownloadBtn');
+  dlBtn.onclick = () => {
+    if(isPrem && !isPremium()){
+      openLockModal('Bu içeriği indirebilmek için Premium üye olmalısın.');
+      return;
+    }
+    const targetUrl = item.file || item.link;
+    if(!targetUrl){
+      showToast('İndirme bağlantısı bulunamadı.','error');
+      return;
+    }
+    triggerDownload(targetUrl, item.fileName || `ruler_asset_${Date.now()}`);
+  };
+  dlBtn.innerHTML = `<i class="fa-solid fa-download"></i> İndir / Bağlantıya Git`;
+
+  openModal('contentViewModal');
+}
+
+/* ============================================================
+   ADMIN YÖNETİM PANELİ
+   ============================================================ */
+function switchAdminTab(tab){
+  ['users','content','announce','feedback','logs','perms'].forEach(t => {
+    const b = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+    const view = document.getElementById(`admin${t.charAt(0).toUpperCase() + t.slice(1)}`);
+    if(b) b.classList.toggle('active', t === tab);
+    if(view) view.classList.toggle('hidden', t !== tab);
+  });
+  if(tab === 'users') loadAdminUsers();
+  if(tab === 'feedback') loadAdminFeedback();
+  if(tab === 'logs') loadAdminLogs();
+  if(tab === 'perms') loadAdminPerms();
+}
+
+function renderAdminTabsVisibility(){
+  if(!isAdmin()) return;
+  const permsBtn = document.getElementById('adminTabPermsBtn');
+  if(permsBtn){
+    permsBtn.classList.toggle('hidden', !isFounder());
+  }
+}
+
+async function loadAdminUsers(){
+  const body = document.getElementById('adminUsersBody');
+  if(!body) return;
+  body.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500">Yükleniyor...</td></tr>';
+
+  const { data: users, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  if(error){
+    body.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-rd">Hata: ${error.message}</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = '';
+  users.forEach(u => {
+    const userObj = mapProfileToUser(u);
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-slate-800/80 hover:bg-surface2/50 transition text-xs';
+
+    const roleBadges = {
+      free: '<span class="bg-slate-700 text-white px-2 py-0.5 rounded text-[10px]">Free</span>',
+      premium: '<span class="bg-cyan/20 text-cyan border border-cyan/40 px-2 py-0.5 rounded text-[10px]">Premium</span>',
+      admin: '<span class="bg-rd/20 text-rd border border-rd/40 px-2 py-0.5 rounded text-[10px]">Admin</span>',
+    };
+
+    const compAiBadges = {
+      none: '<span class="text-slate-500">Yok</span>',
+      requested: '<span class="text-amber-400">Bekliyor</span>',
+      approved: '<span class="text-emerald-400">Onaylı</span>',
+    };
+
+    tr.innerHTML = `
+      <td class="px-5 py-3 font-semibold text-white">${u.username} ${u.is_founder ? '<i class="fa-solid fa-crown text-amber-400 text-[10px] ml-1" title="Kurucu"></i>' : ''}</td>
+      <td class="px-5 py-3 text-slate-400">${u.email}</td>
+      <td class="px-5 py-3">${roleBadges[u.role] || u.role}</td>
+      <td class="px-5 py-3">${u.approved ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : '<i class="fa-solid fa-clock text-amber-400"></i>'}</td>
+      <td class="px-5 py-3 text-slate-300">${premiumStatusText(userObj)}</td>
+      <td class="px-5 py-3">${compAiBadges[u.comp_ai_access] || 'Yok'}</td>
+      <td class="px-5 py-3 text-slate-500">${u.last_login ? new Date(u.last_login).toLocaleString('tr-TR') : 'Hiç'}</td>
+      <td class="px-5 py-3">
+        <button onclick='openManageUserModal(${JSON.stringify(u)})' class="btn-ghost rounded px-2.5 py-1 text-[11px] text-cyan hover:border-cyan"><i class="fa-solid fa-pen-to-square mr-1"></i>Yönet</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+let managingUserId = null;
+function openManageUserModal(user){
+  managingUserId = user.id;
+  document.getElementById('manageUserEmail').textContent = `${user.username} (${user.email})`;
+  document.getElementById('manageRole').value = user.role;
+  document.getElementById('manageCompAi').value = user.comp_ai_access || 'none';
+  onManageRoleChange();
+  openModal('manageUserModal');
+}
+
+function onManageRoleChange(){
+  const role = document.getElementById('manageRole').value;
+  const wrap = document.getElementById('managePremiumWrap');
+  wrap.classList.toggle('hidden', role !== 'premium');
+}
+
+async function saveManageUser(){
+  if(!managingUserId) return;
+  const role = document.getElementById('manageRole').value;
+  const compAi = document.getElementById('manageCompAi').value;
+  
+  let premiumUntil = null;
+  if(role === 'premium'){
+    const dur = document.getElementById('managePremiumDuration').value;
+    if(dur === 'unlimited'){
+      premiumUntil = UNLIMITED_SENTINEL;
+    } else {
+      const ms = DURATION_MS[dur] || DURATION_MS['1m'];
+      premiumUntil = new Date(Date.now() + ms).toISOString();
+    }
+  }
+
+  const { error } = await sb.from('profiles').update({
+    role: role,
+    comp_ai_access: compAi,
+    premium_until: premiumUntil
+  }).eq('id', managingUserId);
+
+  if(error){
+    showToast('Kullanıcı güncellenemedi: ' + error.message, 'error');
+    return;
+  }
+
+  showToast('Kullanıcı bilgileri güncellendi.', 'success');
+  closeModal('manageUserModal');
+  loadAdminUsers();
+}
+
+async function handleAddContent(e){
+  e.preventDefault();
+  const title = document.getElementById('contentTitle').value.trim();
+  const type = document.getElementById('contentType').value;
+  const tier = document.getElementById('contentTier').value;
+  const editor = document.getElementById('contentEditor').value.trim();
+  const description = document.getElementById('contentDesc').value.trim();
+  const featuresRaw = document.getElementById('contentFeatures').value.trim();
+  const features = featuresRaw ? featuresRaw.split(',').map(s=>s.trim()) : [];
+
+  const mediaFile = document.getElementById('contentMedia').files[0];
+  const videoFile = document.getElementById('contentVideo').files[0];
+  const fileObj = document.getElementById('contentFile').files[0];
+  const linkUrl = document.getElementById('contentLink').value.trim();
+
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+
+  try{
+    let thumbUrl = null;
+    let videoUrl = null;
+    let finalFileUrl = linkUrl || null;
+    let fileName = fileObj ? fileObj.name : null;
+
+    if(mediaFile){
+      thumbUrl = await uploadToStorage(mediaFile, 'thumbs');
+    }
+    if(videoFile){
+      videoUrl = await uploadToStorage(videoFile, 'videos');
+    }
+    if(fileObj){
+      finalFileUrl = await uploadToStorage(fileObj, 'assets');
+    }
+
+    const { error } = await sb.from('content').insert({
+      title, type, tier, editor, description, features,
+      thumb: thumbUrl, video_url: videoUrl, file_url: finalFileUrl, file_name: fileName, link: linkUrl
+    });
+
+    if(error){
+      showToast('İçerik eklenemedi: ' + error.message, 'error');
+      return;
+    }
+
+    showToast('İçerik başarıyla yayınlandı!', 'success');
+    e.target.reset();
+    renderArchive();
+  }catch(err){
+    showToast('Hata: ' + (err.message || ''), 'error');
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function handleAddAnnouncement(e){
+  e.preventDefault();
+  const title = document.getElementById('announceTitle').value.trim();
+  const message = document.getElementById('announceMessage').value.trim();
+
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+
+  try{
+    const { error } = await sb.from('announcements').insert({ title, message });
+    if(error){ showToast('Duyuru eklenemedi: ' + error.message, 'error'); return; }
+    showToast('Duyuru yayınlandı!', 'success');
+    e.target.reset();
+    renderDashboardAnnouncements();
+  }catch(err){ showToast('Hata: ' + (err.message||''), 'error'); }
+  finally{ btn.disabled = false; }
+}
+
+async function handleFeedback(e){
+  e.preventDefault();
+  const type = document.getElementById('fbType').value;
+  const message = document.getElementById('fbMessage').value.trim();
+
+  try{
+    const { error } = await sb.from('feedback').insert({
+      type, message,
+      username: currentUser ? currentUser.username : 'Misafir',
+      email: currentUser ? currentUser.email : 'Belirtilmedi'
+    });
+    if(error){ showToast('Gönderilemedi: ' + error.message, 'error'); return; }
+    showToast('Geri bildiriminiz için teşekkürler!', 'success');
+    closeModal('feedbackModal');
+    e.target.reset();
+  }catch(err){ showToast('Hata: ' + (err.message||''), 'error'); }
+}
+
+async function loadAdminFeedback(){
+  const wrap = document.getElementById('adminFeedback');
+  if(!wrap) return;
+  wrap.innerHTML = '<p class="text-xs text-slate-500">Geri bildirimler yükleniyor...</p>';
+
+  DB.feedback = await fetchFeedback();
+  if(DB.feedback.length === 0){
+    wrap.innerHTML = '<p class="text-xs text-slate-500">Henüz geri bildirim yok.</p>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+  DB.feedback.forEach(fb => {
+    const card = document.createElement('div');
+    card.className = 'bg-surface border border-slate-800 rounded-xl p-4 space-y-2';
+    card.innerHTML = `
+      <div class="flex justify-between items-center text-xs">
+        <span class="font-bold text-cyan"><i class="fa-solid fa-tag mr-1"></i>${fb.type}</span>
+        <span class="text-slate-500">${fb.date}</span>
+      </div>
+      <p class="text-sm text-slate-200 leading-relaxed">${fb.message}</p>
+      <div class="text-[11px] text-slate-400 border-t border-slate-800/60 pt-2">
+        Gönderen: <b class="text-slate-300">${fb.username}</b> (${fb.email})
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+async function loadAdminLogs(){
+  const wrap = document.getElementById('adminLogs');
+  if(!wrap) return;
+  wrap.innerHTML = '<p class="text-xs text-slate-500">Giriş kayıtları yükleniyor...</p>';
+
+  const { data: logs, error } = await sb.from('login_logs').select('*').order('created_at', { ascending: false }).limit(50);
+  if(error){
+    wrap.innerHTML = `<p class="text-xs text-rd">Hata: ${error.message}</p>`;
+    return;
+  }
+
+  if(!logs || logs.length === 0){
+    wrap.innerHTML = '<p class="text-xs text-slate-500">Henüz giriş kaydı yok.</p>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+  logs.forEach(log => {
+    const item = document.createElement('div');
+    item.className = 'flex items-center justify-between p-3 border-b border-slate-800/60 text-xs';
+    item.innerHTML = `
+      <div>
+        <p class="font-semibold text-white">${log.username || 'Bilinmeyen'} <span class="text-slate-500 font-normal">(${log.email || ''})</span></p>
+        <p class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-laptop mr-1 text-cyan"></i>${log.device || 'Bilinmeyen Cihaz'}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-mono text-cyan text-[11px]"><i class="fa-solid fa-network-wired mr-1"></i>${log.ip_address || 'IP Alınamadı'}</p>
+        <p class="text-[10px] text-slate-500 mt-0.5">${new Date(log.created_at).toLocaleString('tr-TR')}</p>
+      </div>
+    `;
+    wrap.appendChild(item);
+  });
+}
+
+function loadAdminPerms(){
+  const wrap = document.getElementById('adminPerms');
+  if(!wrap) return;
+  if(!isFounder()){
+    wrap.innerHTML = '<p class="text-xs text-rd">Yönetici yetkilerini sadece sistem kurucusu yönetebilir.</p>';
+    return;
+  }
+  wrap.innerHTML = '<h4 class="font-display font-bold text-white text-base">Kurucu Yönetim Yetkileri</h4><p class="text-xs text-slate-400">Sistem yetkileri aktif ve yapılandırılmıştır.</p>';
+}
+
+/* ============================================================
+   BAŞLANGIÇ YÜKLEMESİ
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if(session && session.user){
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if(profile && !profile.banned){
+      currentUser = mapProfileToUser(profile);
+    }
+  }
+
+  const hash = location.hash.replace('#','');
+  if(hash && PAGE_TITLES[hash]){
+    activeView = hash;
+  }
+
+  initStudio();
+  await renderAll();
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === 'PASSWORD_RECOVERY'){
+      openModal('authModal');
+      switchAuthTab('newpassword');
+    }
+  });
+});
+</script>
+</body>
+</html>
